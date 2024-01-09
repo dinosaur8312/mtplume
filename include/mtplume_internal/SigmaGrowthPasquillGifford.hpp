@@ -1,11 +1,13 @@
 #include "Release.hpp"
 #include "ConstantWindMet.hpp"
 #include "Sensors.hpp"
+#include <math.h>
 
 class SigmaGrowthPasquillGifford
 {
 private:
-    float const stabCoefs[6][10][3] = {
+    static constexpr float posInf = std::numeric_limits<float>::infinity();
+    static constexpr float stabCoefs[6][10][3] = {
         {// A stability
          {100.0f, 122.80f, 0.9447f},
          {150.0f, 158.08f, 1.0542f},
@@ -73,7 +75,7 @@ private:
          {60000.0f, 27.074f, 0.27436f},
          {posInf, 34.219f, 0.21716f}}};
 
-    float const tStabCoefs[6][2] = {
+    static constexpr float tStabCoefs[6][2] = {
         {24.167f, 2.53340f},
         {18.333f, 1.80960f},
         {12.500f, 1.08570f},
@@ -81,27 +83,9 @@ private:
         {6.2500f, 0.54287f},
         {4.1667f, 0.36191f}};
 
-    void SigmaCalc<T>::coefs(int stab, T dist, T &aCoef, T &bCoef)
-    {
-        if (isfinite(dist))
-        {
-            for (int i = 0; 0 < 10; ++i)
-            {
-                if (dist <= stabCoefs[stab][i][0])
-                {
-                    aCoef = stabCoefs[stab][i][1];
-                    bCoef = stabCoefs[stab][i][2];
-                    return;
-                }
-            }
-        }
-        aCoef = std::numeric_limits<T>::quiet_NaN();
-        bCoef = std::numeric_limits<T>::quiet_NaN();
-    }
+    void coefs(int stab, float dist, float &aCoef, float &bCoef);
 
-    template <typename T>
-    __device__ void
-    SigmaCalc<T>::tCoefs(int stab, T &tCoef1, T &tCoef2)
+    static void tCoefs(int stab, float &tCoef1, float &tCoef2)
     {
         tCoef1 = tStabCoefs[stab][0];
         tCoef2 = tStabCoefs[stab][1];
@@ -121,12 +105,12 @@ public:
 
     static float sigmaFunction(int stability, float dist)
     {
-        static constexpr float RPD = PI / 180.f;
+        static constexpr float RPD = M_PI / 180.f;
         static constexpr float oneMM = 1.0e-6;
         float tCoef1, tCoef2;
         tCoefs(stability, tCoef1, tCoef2);
-        flaot distKm = fmax(oneMM, fmin(500.f, dist / 1000.f));
+        float distKm = fmax(oneMM, fmin(500.f, dist / 1000.f));
         float t = tCoef1 - tCoef2 * log(distKm);
         return dist * tan(RPD * t) / 2.15f;
     }
-}
+};

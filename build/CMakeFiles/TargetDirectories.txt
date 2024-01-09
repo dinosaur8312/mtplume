@@ -1,0 +1,4 @@
+/home/xianlong/Code/mtplume/build/CMakeFiles/mtplume.dir
+/home/xianlong/Code/mtplume/build/CMakeFiles/doc_doxygen.dir
+/home/xianlong/Code/mtplume/build/CMakeFiles/edit_cache.dir
+/home/xianlong/Code/mtplume/build/CMakeFiles/rebuild_cache.dir
