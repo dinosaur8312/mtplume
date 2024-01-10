@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/mtplume.dir/src/common/SigmaGrowthPasquillGifford.cpp.o CMakeFiles/mtplume.dir/src/common/mtplume.cpp.o -o mtplume  /usr/local/cuda/lib64/libcudart_static.a -ldl /usr/lib/x86_64-linux-gnu/librt.a 
