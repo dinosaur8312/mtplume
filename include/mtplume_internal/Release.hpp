@@ -1,3 +1,5 @@
+#ifndef MTPLUME_RLEASE_H
+#define MTPLUME_RLEASE_H
 #include <vector>
 #include <cuda.h>
 #include <thrust/host_vector.h>
@@ -5,7 +7,7 @@
 
 class Release
 {
-private:
+public:
     // Private member variables
     thrust::host_vector<float> _h_x;
     thrust::host_vector<float> _h_xVirt;
@@ -16,11 +18,14 @@ private:
     thrust::device_vector<float> _d_mass;
 
 
-public:
-    // Constructor
-    Release()
+    // Constructor with mass and optional x, xVirt
+    Release(thrust::host_vector<float> mass, thrust::host_vector<float> x = thrust::host_vector<float>(1, 0.0f), thrust::host_vector<float> xVirt = thrust::host_vector<float>(1, 0.0f))
     {
+        _h_mass = mass;
+        _h_x = x;
+        _h_xVirt = xVirt;
     }
+    
 
     //destructor
     ~Release()
@@ -31,3 +36,4 @@ public:
 
     // ...
 };
+#endif // MTPLUME_RLEASE_H

@@ -1,3 +1,5 @@
+#ifndef MTPLUME_CONSTANTWINDMET_HPP
+#define MTPLUME_CONSTANTWINDMET_HPP
 #include <vector>
 #include <cuda.h>
 #include <thrust/host_vector.h>
@@ -5,7 +7,7 @@
 
 class ConstantWindMet
 {
-private:
+    public:
     thrust::host_vector<float> _h_hml;
     thrust::host_vector<float> _h_speed;
     thrust::host_vector<int> _h_stability;
@@ -14,7 +16,6 @@ private:
     thrust::device_vector<float> _d_speed;
     thrust::device_vector<int> _d_stability;
 
-    public:
     // Constructor
     ConstantWindMet(thrust::host_vector<float> hml, thrust::host_vector<int> stability, thrust::host_vector<float> speed)
     {
@@ -28,4 +29,11 @@ private:
     {
         // Perform any necessary cleanup here
     }
+
+    //function to return size of _h_staiblity;
+    int getStabilitySize()
+    {
+        return _h_stability.size();
+    }
 };
+#endif // MTPLUME_CONSTANTWINDMET_HPP

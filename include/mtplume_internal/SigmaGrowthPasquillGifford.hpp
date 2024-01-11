@@ -1,11 +1,15 @@
+#ifndef MTPLUME_SIGMA_GROWTH_PASQUILL_GIFFORD_HPP
+#define MTPLUME_SIGMA_GROWTH_PASQUILL_GIFFORD_HPP
+
 #include "Release.hpp"
 #include "ConstantWindMet.hpp"
-#include "Sensors.hpp"
+#include "Sensor.hpp"
 #include <math.h>
 
 class SigmaGrowthPasquillGifford
 {
 private:
+    static constexpr float sigma0 = 1.0e-1;
     static constexpr float posInf = std::numeric_limits<float>::infinity();
     static constexpr float stabCoefs[6][10][3] = {
         {// A stability
@@ -91,10 +95,116 @@ private:
         tCoef2 = tStabCoefs[stab][1];
     }
 
+    Sensor *sensor;
+    Release *release;
+    ConstantWindMet *met;
+    thrust::host_vector<float> sigx;
+    thrust::host_vector<float> sigy;
+    thrust::host_vector<float> sigz;
+    thrust::host_vector<float> zfunc;
+    thrust::host_vector<float> dosage;
+    int numx, numz, numt, numl, numr, numst;
+
+    inline void fx(int xidx, int sidx)
+    {
+        float xdw = sensor->_h_x[xidx] - release->_h_x[0] + release->_h_xVirt[0];
+
+        bool clip = 1;
+        sigx[numx * sidx + xidx] = (clip && xdw < 0.f) ? sigma0 : sigmaFunction(met->_h_stability[sidx], xdw);
+        printf("xk_flag, xdw = %f,  sigx(%d,%d) = %f\n", xdw, xidx, sidx, sigx[numx * sidx + xidx]);
+    }
+    inline void fy(int xidx, int sidx)
+    {
+        float xdw = sensor->_h_x[xidx] - release->_h_x[0] + release->_h_xVirt[0];
+
+        bool clip = 1;
+        sigy[numx * sidx + xidx] = (clip && xdw < 0.f) ? sigma0 : sigmaFunction(met->_h_stability[sidx], xdw);
+        printf("xk_flag, xdw = %f,  sigy(%d,%d) = %f\n", xdw, xidx, sidx, sigy[numx * sidx + xidx]);
+    }
+
+    inline void fz(int xidx, int sidx)
+    {
+        float xdw = sensor->_h_x[xidx] - release->_h_x[0] + release->_h_xVirt[0];
+        bool clip = 1;
+        float aCoef, bCoef;
+        coefs(met->_h_stability[sidx], xdw, aCoef, bCoef);
+        sigz[numx * sidx + xidx] = (clip && xdw <= 0.f) ? sigma0 : aCoef * pow(1.0e-3 * xdw, bCoef);
+        printf("xk_flag, xdw = %f, sigz(%d,%d) = %f\n", xdw, xidx, sidx, sigz[numx * sidx + xidx]);
+    }
+
+    template <int N>
+    float zReflections(float zrcp, float zplume, float hml, float sigz)
+    {
+        float arg = (zrcp - zplume) / sigz;
+        if (fabs(arg) > 4.f)
+            return 0.f;
+        float zf = exp(-0.5f * arg * arg);
+        if constexpr (N < 5)
+        {
+            if (0.0f < zplume)
+                zf += zReflections<N + 1>(zrcp, -zplume, hml, sigz);
+            if (zplume < hml)
+                zf += zReflections<N + 1>(zrcp, 2.0f * hml - zplume, hml, sigz);
+        }
+        else
+        {
+            hml;
+        }
+        return zf;
+    }
+
+    inline float zFunction(float zrcp, float zplume, float hml, float sigz)
+    {
+        if (hml < zrcp)
+            return 0.f;
+        if (hml < sigz)
+            return 1.f / hml;
+        zplume = zplume < 1.0e-3 ? 1.0e-3 : zplume;
+        zplume = (hml - 1.0e-3) <= zplume ? hml - 1.0e-3 : zplume;
+        static constexpr float INV_ROOT2PI = 0.3989422804014327;
+        return INV_ROOT2PI / sigz * zReflections<0>(zrcp, zplume, hml, sigz);
+    }
+
+
+    inline float normcdf(float x)
+    {
+        static constexpr float INV_SQRT2 = 0.7071067811865475;
+        return 0.5f * (1.f + erf(INV_SQRT2 * x));
+    }
+
+
+    inline float insCenterlineDosage(
+        float x, float t, float Q, float U, float zFunc, float sigX, float sigY)
+    {
+        if (t < 0.f)
+        {
+            return 0.f;
+        }
+        static constexpr float INV_ROOT2PI = 0.3989422804014327;
+        float coef = INV_ROOT2PI / (sigY * U) * zFunc;
+        return Q * coef * normcdf((U * t - x) / sigX) - normcdf(-x / sigX);
+    }
+
 public:
     // Constructor
-    SigmaGrowthPasquillGifford()
+    SigmaGrowthPasquillGifford(Sensor *sensor, Release *release, ConstantWindMet *met)
+        : sensor(sensor), release(release), met(met)
     {
+        // Perform any necessary initialization here
+        numx = sensor->_h_x.size();
+        numz = sensor->_h_z.size();
+        numt = sensor->_h_t.size();
+        numl = sensor->_h_level.size();
+        numr = release->_h_mass.size();
+        numst = met->_h_stability.size();
+        sigx.resize(numx * numst);
+        sigy.resize(numx * numst);
+        sigz.resize(numx * numst);
+        zfunc.resize(numx * numst);
+        dosage.resize(numx * numt * numst);
+        calcSigmasImpl();
+        calcZfunc();
+        calcDosage();
     }
 
     // Destructor
@@ -111,6 +221,19 @@ public:
         tCoefs(stability, tCoef1, tCoef2);
         float distKm = fmax(oneMM, fmin(500.f, dist / 1000.f));
         float t = tCoef1 - tCoef2 * log(distKm);
+        printf("dist=%f, t=%f\n", dist, t);
         return dist * tan(RPD * t) / 2.15f;
     }
+
+    void calcSigmasImpl();
+    void calcZfunc();
+    void calcDosage();
+
+    // get stability size
+    int getStabilitySize()
+    {
+        return met->getStabilitySize();
+    }
 };
+
+#endif // MTPLUME_SIGMA_GROWTH_PASQUILL_GIFFORD_HPP

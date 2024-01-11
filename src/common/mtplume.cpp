@@ -1,6 +1,5 @@
-#include "ConstantWindMet.hpp"
-#include "Release.hpp"
-#include "Sensors.hpp"
+
+#include "SigmaGrowthPasquillGifford.hpp"
 
 //main function
 int main(int argc, char* argv[])
@@ -13,11 +12,17 @@ int main(int argc, char* argv[])
 
     ConstantWindMet *met = new ConstantWindMet(hml, stabilityClass, windSpeed);
 
-    // Create a new instance of the Release class
-    Release release;
 
+    thrust::host_vector<float> mass = {1.f};
+    // Create a new instance of the Release class
+    Release *release = new Release(mass);
+
+
+
+    thrust::host_vector<float> times = {0.0f, 1000.0f, 2000.0f, 3000.0f};
+    thrust::host_vector<float> counterLevels = {1.0e-5f, 1.0e0f, 1.0e5f};
     // Create a new instance of the Sensor class
-    Sensor sensor;
+    Sensor *sensor = new Sensor(times, counterLevels);
 
     // Create a new instance of the Plume class
  //   Plume plume;
@@ -25,8 +30,14 @@ int main(int argc, char* argv[])
     // Create a new instance of the PlumeModel class
 //    PlumeModel plumeModel;
 
+    // Create a new instance of the SigmaGrowthPasquillGifford class
+   SigmaGrowthPasquillGifford *sigmaGrowthPasquillGifford = new SigmaGrowthPasquillGifford(sensor, release, met);  
+
     delete met;
 
+    delete release;
+
+    delete sensor;
 
     return 0;
 }
