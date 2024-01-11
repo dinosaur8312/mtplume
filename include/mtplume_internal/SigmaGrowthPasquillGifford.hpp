@@ -103,6 +103,8 @@ private:
     thrust::host_vector<float> sigz;
     thrust::host_vector<float> zfunc;
     thrust::host_vector<float> dosage;
+    thrust::host_vector<float> hws;
+    thrust::host_vector<float> areas;
     int numx, numz, numt, numl, numr, numst;
 
     inline void fx(int xidx, int sidx)
@@ -183,7 +185,24 @@ private:
         static constexpr float INV_ROOT2PI = 0.3989422804014327;
         float coef = INV_ROOT2PI / (sigY * U) * zFunc;
         return Q * coef * normcdf((U * t - x) / sigX) - normcdf(-x / sigX);
+
     }
+
+    inline float halfWidth(float level, float dosage, float sigY)
+    {
+        return dosage < level ? NAN :
+            sigY * sqrt(-2.f * log(level / dosage));
+    }
+
+    
+    float trapzRule(float a, float b, float f0, float f1)
+    {
+        if (isfinite(f0) && isfinite(f1)) {
+            return (b - a) * (f0 + f1);
+        }
+        return 0.f;
+    }
+
 
 public:
     // Constructor
@@ -202,9 +221,13 @@ public:
         sigz.resize(numx * numst);
         zfunc.resize(numx * numst);
         dosage.resize(numx * numt * numst);
+        hws.resize(numx * numt * numl * numst);
+        areas.resize(numx * numt * numl * numst);
         calcSigmasImpl();
         calcZfunc();
         calcDosage();
+        calcHalfWidths();
+        updateAreas();
     }
 
     // Destructor
@@ -228,6 +251,8 @@ public:
     void calcSigmasImpl();
     void calcZfunc();
     void calcDosage();
+    void calcHalfWidths();
+    void updateAreas();
 
     // get stability size
     int getStabilitySize()

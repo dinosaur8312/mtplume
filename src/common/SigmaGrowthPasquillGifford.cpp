@@ -73,4 +73,58 @@ void SigmaGrowthPasquillGifford::calcDosage()
         }
     }
     printf("xk_flag, End SigmaGrowthPasquillGifford::calcdosage\n");
+    return;
+}
+
+void SigmaGrowthPasquillGifford::calcHalfWidths()
+{
+    printf("xk_flag, Begin SigmaGrowthPasquillGifford::calcHalfWidths\n");
+    for (int sidx = 0; sidx < numst; ++sidx)
+    {
+        for (int xidx = 0; xidx < numx; ++xidx)
+        {
+            for (int tidx = 0; tidx < numt; ++tidx)
+            {
+                for (int lidx = 0; lidx < numl; ++lidx)
+                {
+                    hws[lidx + tidx * numl + xidx * numl * numt + sidx * numl * numt * numx] = halfWidth(
+                        sensor->_h_level[lidx],
+                        dosage[tidx + xidx * numt + sidx * numt * numx],
+                        sigy[xidx + sidx * numx]);
+                    printf("xk_flag, calcHalfWidths, lidx = %d, tidx = %d, xidx = %d, sidx = %d, out(lidx,tidx,xidx,sidx) = %f\n",
+                           lidx, tidx, xidx, sidx, hws[lidx + tidx * numl + xidx * numl * numt + sidx * numl * numt * numx]);
+                }
+            }
+        }
+    }
+    printf("xk_flag, End SigmaGrowthPasquillGifford::calcHalfWidths\n");
+    return;
+}
+
+void SigmaGrowthPasquillGifford::updateAreas()
+{
+    printf("xk_flag, Begin SigmaGrowthPasquillGifford::updateAreas\n");
+
+    for (int sidx = 0; sidx < numst; ++sidx)
+    {
+        for (int tidx = 0; tidx < numt; ++tidx)
+        {
+            for (int lidx = 0; lidx < numl; ++lidx)
+            {
+                float area = 0.f;
+                for (int xidx = 0; xidx < numx - 1; ++xidx)
+                {
+                    area += trapzRule(
+                        sensor->_h_x[xidx],
+                        sensor->_h_x[xidx+1],
+                        hws[lidx+tidx*numl+xidx*numl*numt+sidx*numl*numt*numx],
+                        hws[lidx+tidx*numl+(xidx+1)*numl*numt+sidx*numl*numt*numx]);
+                }
+                areas[lidx + tidx * numl + sidx * numl * numx] = 2.0f * area;
+                printf("xk_flag, updateAreas, lidx = %d, tidx = %d, sidx = %d, out(lidx,tidx,sidx) = %f\n",
+                       lidx, tidx, sidx, areas[lidx + tidx * numl + sidx * numl * numx]);
+            }
+        }
+    }
+    printf("xk_flag, End SigmaGrowthPasquillGifford::updateAreas\n");
 }
