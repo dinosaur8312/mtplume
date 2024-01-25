@@ -10,7 +10,11 @@ int main(int argc, char* argv[])
     thrust::host_vector<float> windSpeed = {1.f};
     thrust::host_vector<int> stabilityClass = {0,1,2,3,4,5};
 
-    ConstantWindMet *met = new ConstantWindMet(hml, stabilityClass, windSpeed);
+
+    // Use std::unique_ptr and std::move
+    auto met = std::make_unique<ConstantWindMet>(std::move(hml), 
+                                                 std::move(stabilityClass), 
+                                                std::move(windSpeed));
 
 
     thrust::host_vector<float> mass = {1.f};
@@ -33,7 +37,6 @@ int main(int argc, char* argv[])
     // Create a new instance of the SigmaGrowthPasquillGifford class
    SigmaGrowthPasquillGifford *sigmaGrowthPasquillGifford = new SigmaGrowthPasquillGifford(sensor, release, met);  
 
-    delete met;
 
     delete release;
 

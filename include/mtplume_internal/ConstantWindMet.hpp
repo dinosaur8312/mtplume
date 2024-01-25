@@ -16,12 +16,23 @@ class ConstantWindMet
     thrust::device_vector<float> _d_speed;
     thrust::device_vector<int> _d_stability;
 
+/*
     // Constructor
     ConstantWindMet(thrust::host_vector<float> hml, thrust::host_vector<int> stability, thrust::host_vector<float> speed)
     {
         _h_hml = hml;
         _h_stability = stability;
         _h_speed = speed;
+    }*/
+
+    // Constructor using member initializer list and move semantics
+    ConstantWindMet(thrust::host_vector<float>&& hml, 
+                    thrust::host_vector<int>&& stability, 
+                    thrust::host_vector<float>&& speed)
+        : _h_hml(std::move(hml)), 
+          _h_stability(std::move(stability)), 
+          _h_speed(std::move(speed))
+    {
     }
 
     //Destructor

@@ -9,20 +9,22 @@ class Release
 {
 public:
     // Private member variables
-    thrust::host_vector<float> _h_x;
-    thrust::host_vector<float> _h_xVirt;
+    thrust::host_vector<float3> _h_loc;
+    thrust::host_vector<float3> _h_xVirt;
     thrust::host_vector<float> _h_mass;
 
-    thrust::device_vector<float> _d_x;
-    thrust::device_vector<float> _d_xVirt;
+    thrust::device_vector<float3> _d_loc;
+    thrust::device_vector<float3> _d_xVirt;
     thrust::device_vector<float> _d_mass;
 
 
     // Constructor with mass and optional x, xVirt
-    Release(thrust::host_vector<float> mass, thrust::host_vector<float> x = thrust::host_vector<float>(1, 0.0f), thrust::host_vector<float> xVirt = thrust::host_vector<float>(1, 0.0f))
+    Release(thrust::host_vector<float> mass, 
+            thrust::host_vector<float3> loc = thrust::host_vector<float3>(1, make_float3(0.f,0.f,0.f)), 
+            thrust::host_vector<float3> xVirt = thrust::host_vector<float3>(1, make_float3(0.f,0.f,0.f)))
     {
         _h_mass = mass;
-        _h_x = x;
+        _h_loc = loc;
         _h_xVirt = xVirt;
     }
     

@@ -41,7 +41,7 @@ void SigmaGrowthPasquillGifford::calcZfunc()
     {
         for (int xidx = 0; xidx < numx; ++xidx)
         {
-            zfunc[xidx + sidx * numx] = zFunction(sensor->_h_z[xidx], release->_h_x[0], met->_h_hml[0], sigz[xidx + sidx * numx]);
+            zfunc[xidx + sidx * numx] = zFunction(sensor->_h_z[xidx], release->_h_loc[0].z, met->_h_hml[0], sigz[xidx + sidx * numx]);
             printf("xk_flag, calcZfunc, xidx = %d, sidx =%d,sigZ = %f, out=%f\n",
                    xidx, sidx, sigz[xidx + sidx * numx], zfunc[xidx + sidx * numx]);
         }

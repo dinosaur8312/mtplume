@@ -109,7 +109,7 @@ private:
 
     inline void fx(int xidx, int sidx)
     {
-        float xdw = sensor->_h_x[xidx] - release->_h_x[0] + release->_h_xVirt[0];
+        float xdw = sensor->_h_x[xidx] - release->_h_loc[0].x + release->_h_xVirt[0].x;
 
         bool clip = 1;
         sigx[numx * sidx + xidx] = (clip && xdw < 0.f) ? sigma0 : sigmaFunction(met->_h_stability[sidx], xdw);
@@ -117,7 +117,7 @@ private:
     }
     inline void fy(int xidx, int sidx)
     {
-        float xdw = sensor->_h_x[xidx] - release->_h_x[0] + release->_h_xVirt[0];
+        float xdw = sensor->_h_x[xidx] - release->_h_loc[0].x + release->_h_xVirt[0].y;
 
         bool clip = 1;
         sigy[numx * sidx + xidx] = (clip && xdw < 0.f) ? sigma0 : sigmaFunction(met->_h_stability[sidx], xdw);
@@ -126,7 +126,7 @@ private:
 
     inline void fz(int xidx, int sidx)
     {
-        float xdw = sensor->_h_x[xidx] - release->_h_x[0] + release->_h_xVirt[0];
+        float xdw = sensor->_h_x[xidx] - release->_h_loc[0].x + release->_h_xVirt[0].z;
         bool clip = 1;
         float aCoef, bCoef;
         coefs(met->_h_stability[sidx], xdw, aCoef, bCoef);
@@ -167,6 +167,11 @@ private:
         return INV_ROOT2PI / sigz * zReflections<0>(zrcp, zplume, hml, sigz);
     }
 
+    inline float normpdf(float x)
+    {
+        static constexpr float INV_SQRT2PI = 0.3989422804014327;
+        return INV_SQRT2PI * exp(-0.5f * x * x);
+    }
 
     inline float normcdf(float x)
     {
@@ -174,6 +179,15 @@ private:
         return 0.5f * (1.f + erf(INV_SQRT2 * x));
     }
 
+    inline float normidf(float x)
+    {
+        if(x<-6.f)
+            return 0.f;
+        else if(x>6.f)
+            return x;
+
+        return x*normcdf(x)+normpdf(x);
+    }
 
     inline float insCenterlineDosage(
         float x, float t, float Q, float U, float zFunc, float sigX, float sigY)
@@ -185,6 +199,28 @@ private:
         static constexpr float INV_ROOT2PI = 0.3989422804014327;
         float coef = INV_ROOT2PI / (sigY * U) * zFunc;
         return Q * coef * normcdf((U * t - x) / sigX) - normcdf(-x / sigX);
+
+    }
+
+    inline float semCenterlineDosage(
+        float x, float t, float T, float Q, float U, float zFunc, float sigX, float sigY)
+    {
+        if (t < 0.f)
+        {
+            return 0.f;
+        }
+        static constexpr float INV_ROOT2PI = 0.3989422804014327;
+        float coef = INV_ROOT2PI / (sigY * U * T) * zFunc;
+
+        float D_tip = Q * coef * * sigX / U * (normidf((U * t - x) / sigX) - normidf(- x/sigX));
+
+        float D_tail;
+        if(t<T)
+            D_tail = Q * coef * (  t*normcdf(-x/sigX))
+        if(t>=T)
+            D_tail = Q * coef * (  T*normcdf(-x/sigX) 
+                                   + sigX/U*(normidf((U(t-T)-x)/sigX)-normidf(-x/sigX))  );
+        return D_tip - D_tail;
 
     }
 
