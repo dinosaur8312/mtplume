@@ -33,6 +33,8 @@ class ConstantWindMet
           _h_stability(std::move(stability)), 
           _h_speed(std::move(speed))
     {
+
+        printf("begin ConstantWindMet constructor\n");
     }
 
     //Destructor

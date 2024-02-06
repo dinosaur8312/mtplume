@@ -7,8 +7,11 @@ int main(int argc, char* argv[])
     // Create a new instance of the ConstantWindMet class
 
     thrust::host_vector<float> hml = {500.f};
-    thrust::host_vector<float> windSpeed = {1.f};
+    //thrust::host_vector<float> windSpeed = {1.f};
+    thrust::host_vector<float> windSpeed = {0.8f, 2.3f, 4.1f, 6.7f, 9.6f, 12.f};
     thrust::host_vector<int> stabilityClass = {0,1,2,3,4,5};
+
+    printf("pointer address of stabilityClass: %p\n", stabilityClass.data());
 
 
     // Use std::unique_ptr and std::move
@@ -28,6 +31,9 @@ int main(int argc, char* argv[])
     // Create a new instance of the Sensor class
     Sensor *sensor = new Sensor(times, counterLevels);
 
+    printf("before real calculation\n");
+    fflush(0);
+
     // Create a new instance of the Plume class
  //   Plume plume;
 
@@ -35,7 +41,9 @@ int main(int argc, char* argv[])
 //    PlumeModel plumeModel;
 
     // Create a new instance of the SigmaGrowthPasquillGifford class
-   SigmaGrowthPasquillGifford *sigmaGrowthPasquillGifford = new SigmaGrowthPasquillGifford(sensor, release, met);  
+   //SigmaGrowthPasquillGifford *sigmaGrowthPasquillGifford = new SigmaGrowthPasquillGifford(sensor, release, met);  
+   SigmaGrowthPasquillGifford *sigmaGrowthPasquillGifford = new SigmaGrowthPasquillGifford(sensor, release, std::move(met));
+
 
 
     delete release;

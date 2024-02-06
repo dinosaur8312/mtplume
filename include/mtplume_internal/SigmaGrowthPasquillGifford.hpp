@@ -97,7 +97,8 @@ private:
 
     Sensor *sensor;
     Release *release;
-    ConstantWindMet *met;
+    //ConstantWindMet *met;
+    std::unique_ptr<ConstantWindMet> met;
     thrust::host_vector<float> sigx;
     thrust::host_vector<float> sigy;
     thrust::host_vector<float> sigz;
@@ -212,14 +213,14 @@ private:
         static constexpr float INV_ROOT2PI = 0.3989422804014327;
         float coef = INV_ROOT2PI / (sigY * U * T) * zFunc;
 
-        float D_tip = Q * coef * * sigX / U * (normidf((U * t - x) / sigX) - normidf(- x/sigX));
+        float D_tip = Q * coef *  sigX / U * (normidf((U * t - x) / sigX) - normidf(- x/sigX));
 
         float D_tail;
         if(t<T)
-            D_tail = Q * coef * (  t*normcdf(-x/sigX))
+            D_tail = Q * coef * (  t*normcdf(-x/sigX));
         if(t>=T)
             D_tail = Q * coef * (  T*normcdf(-x/sigX) 
-                                   + sigX/U*(normidf((U(t-T)-x)/sigX)-normidf(-x/sigX))  );
+                                   + sigX/U*(normidf((U*(t-T)-x)/sigX)-normidf(-x/sigX))  );
         return D_tip - D_tail;
 
     }
@@ -242,53 +243,23 @@ private:
 
 public:
     // Constructor
-    SigmaGrowthPasquillGifford(Sensor *sensor, Release *release, ConstantWindMet *met)
-        : sensor(sensor), release(release), met(met)
-    {
-        // Perform any necessary initialization here
-        numx = sensor->_h_x.size();
-        numz = sensor->_h_z.size();
-        numt = sensor->_h_t.size();
-        numl = sensor->_h_level.size();
-        numr = release->_h_mass.size();
-        numst = met->_h_stability.size();
-        sigx.resize(numx * numst);
-        sigy.resize(numx * numst);
-        sigz.resize(numx * numst);
-        zfunc.resize(numx * numst);
-        dosage.resize(numx * numt * numst);
-        hws.resize(numx * numt * numl * numst);
-        areas.resize(numx * numt * numl * numst);
-        calcSigmasImpl();
-        calcZfunc();
-        calcDosage();
-        calcHalfWidths();
-        updateAreas();
-    }
-
+ //    std::unique_ptr<ConstantWindMet> met
+      SigmaGrowthPasquillGifford(Sensor *sensor, Release *release, std::unique_ptr<ConstantWindMet> met);
+   // SigmaGrowthPasquillGifford(Sensor *sensor, Release *release, ConstantWindMet *met);
     // Destructor
     ~SigmaGrowthPasquillGifford()
     {
         // Perform any necessary cleanup here
     }
 
-    static float sigmaFunction(int stability, float dist)
-    {
-        static constexpr float RPD = M_PI / 180.f;
-        static constexpr float oneMM = 1.0e-6;
-        float tCoef1, tCoef2;
-        tCoefs(stability, tCoef1, tCoef2);
-        float distKm = fmax(oneMM, fmin(500.f, dist / 1000.f));
-        float t = tCoef1 - tCoef2 * log(distKm);
-        printf("dist=%f, t=%f\n", dist, t);
-        return dist * tan(RPD * t) / 2.15f;
-    }
+    static float sigmaFunction(int stability, float dist);
 
     void calcSigmasImpl();
     void calcZfunc();
     void calcDosage();
     void calcHalfWidths();
     void updateAreas();
+    void compareCSVdata();
 
     // get stability size
     int getStabilitySize()

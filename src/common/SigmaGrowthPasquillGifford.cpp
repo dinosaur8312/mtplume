@@ -1,4 +1,53 @@
 #include "SigmaGrowthPasquillGifford.hpp"
+#include "CSVReader.hpp"
+
+// Constructor
+// SigmaGrowthPasquillGifford::SigmaGrowthPasquillGifford(Sensor *sensor, Release *release, ConstantWindMet *met)
+SigmaGrowthPasquillGifford::SigmaGrowthPasquillGifford(Sensor *sensor_ptr, Release *release_ptr, std::unique_ptr<ConstantWindMet> met_ptr)
+    : sensor(sensor_ptr), release(release_ptr), met(std::move(met_ptr))
+{
+    // Perform any necessary initialization here
+    printf("xk_flag, Begin SigmaGrowthPasquillGifford::SigmaGrowthPasquillGifford\n");
+    numx = sensor->_h_x.size();
+    numz = sensor->_h_z.size();
+    numt = sensor->_h_t.size();
+    numl = sensor->_h_level.size();
+    numr = release->_h_mass.size();
+    numst = met->_h_stability.size();
+    sigx.resize(numx * numst);
+    sigy.resize(numx * numst);
+    sigz.resize(numx * numst);
+    zfunc.resize(numx * numst);
+    dosage.resize(numx * numt * numst);
+    hws.resize(numx * numt * numl * numst);
+    areas.resize(numx * numt * numl * numst);
+    calcSigmasImpl();
+
+    if (1)
+    {
+        compareCSVdata();
+    }
+    else
+    {
+        calcZfunc();
+        calcDosage();
+        calcHalfWidths();
+        updateAreas();
+    }
+}
+
+float SigmaGrowthPasquillGifford ::sigmaFunction(int stability, float dist)
+{
+    static constexpr float RPD = M_PI / 180.f;
+    static constexpr float oneMM = 1.0e-6;
+    float tCoef1, tCoef2;
+    tCoefs(stability, tCoef1, tCoef2);
+    float distKm = fmax(oneMM, fmin(500.f, dist / 1000.f));
+    float t = tCoef1 - tCoef2 * log(distKm);
+    printf("dist=%f, t=%f\n", dist, t);
+    return dist * tan(RPD * t) / 2.15f;
+}
+
 void SigmaGrowthPasquillGifford::coefs(int stab, float dist, float &aCoef, float &bCoef)
 {
     if (isfinite(dist))
@@ -32,6 +81,17 @@ void SigmaGrowthPasquillGifford::calcSigmasImpl()
         }
     }
     printf("xk_flag, End SigmaGrowthPasquillGifford::calcSigmasImp\n");
+}
+
+void SigmaGrowthPasquillGifford::compareCSVdata()
+{
+    printf("xk_flag, Begin SigmaGrowthPasquillGifford::compareCSVdata\n");
+
+    CSVReader *myreader = new CSVReader();
+    DataContainer data = myreader->readCSV("hpac_dispersion_coefs.csv", "index", "iwind", "istab");
+
+    delete myreader;
+    printf("xk_flag, End SigmaGrowthPasquillGifford::compareCSVdata\n");
 }
 
 void SigmaGrowthPasquillGifford::calcZfunc()
@@ -116,9 +176,9 @@ void SigmaGrowthPasquillGifford::updateAreas()
                 {
                     area += trapzRule(
                         sensor->_h_x[xidx],
-                        sensor->_h_x[xidx+1],
-                        hws[lidx+tidx*numl+xidx*numl*numt+sidx*numl*numt*numx],
-                        hws[lidx+tidx*numl+(xidx+1)*numl*numt+sidx*numl*numt*numx]);
+                        sensor->_h_x[xidx + 1],
+                        hws[lidx + tidx * numl + xidx * numl * numt + sidx * numl * numt * numx],
+                        hws[lidx + tidx * numl + (xidx + 1) * numl * numt + sidx * numl * numt * numx]);
                 }
                 areas[lidx + tidx * numl + sidx * numl * numx] = 2.0f * area;
                 printf("xk_flag, updateAreas, lidx = %d, tidx = %d, sidx = %d, out(lidx,tidx,sidx) = %f\n",
