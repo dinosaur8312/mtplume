@@ -5,6 +5,7 @@
 #include "ConstantWindMet.hpp"
 #include "Sensor.hpp"
 #include <math.h>
+#include "CSVReader.hpp"
 
 class SigmaGrowthPasquillGifford
 {
@@ -239,6 +240,9 @@ private:
         }
         return 0.f;
     }
+
+    void compareSigmaX(DataContainer_v1 data);
+    void compareSigmaData(DataContainer coefs, DataContainer_v1 data);
 
 
 public:

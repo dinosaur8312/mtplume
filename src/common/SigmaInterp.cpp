@@ -1,5 +1,5 @@
    #include "SigmaInterp.hpp"
-   
+   /*
    float SigmaInterp::getSigmaX(float x, float wind, int istab) {
         // Simplify the problem by assuming a direct mapping from windSpeed to windIndex (you will need a real method for this)
         // Also, assuming istab can be directly used as an index
@@ -35,3 +35,5 @@
         // Perform bilinear interpolation
         return bilinearInterpolate(x, wind, fQ11, fQ21, fQ12, fQ22, x1, x2, y1, y2);
     }
+
+    */

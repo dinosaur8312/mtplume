@@ -7,141 +7,114 @@
 #include "CSVReader.hpp"
 
 // Constructor
-DataContainer::DataContainer(int istabSize, int iwindSize, int indexSize)
-{
-    x.resize(istabSize, std::vector<std::vector<double>>(iwindSize, std::vector<double>(indexSize)));
-    sig_x.resize(istabSize, std::vector<std::vector<double>>(iwindSize, std::vector<double>(indexSize)));
-    sig_y.resize(istabSize, std::vector<std::vector<double>>(iwindSize, std::vector<double>(indexSize)));
-    sig_z.resize(istabSize, std::vector<std::vector<double>>(iwindSize, std::vector<double>(indexSize)));
-    D0.resize(istabSize, std::vector<std::vector<double>>(iwindSize, std::vector<double>(indexSize)));
-    D0U_Q.resize(istabSize, std::vector<std::vector<double>>(iwindSize, std::vector<double>(indexSize)));
-    coef_y.resize(istabSize, std::vector<std::vector<double>>(iwindSize, std::vector<double>(indexSize)));
-    expon_y.resize(istabSize, std::vector<std::vector<double>>(iwindSize, std::vector<double>(indexSize)));
-    coef_z.resize(istabSize, std::vector<std::vector<double>>(iwindSize, std::vector<double>(indexSize)));
-    expon_z.resize(istabSize, std::vector<std::vector<double>>(iwindSize, std::vector<double>(indexSize)));
-};
-
-// read CSV data and populate DataContainer
-DataContainer CSVReader::readCSV(const std::string &fileName, const std::string &indexKey, const std::string &iwindKey, const std::string &istabKey)
-{
+DataContainer CSVReader::readCSV(const std::string &fileName) {
     std::ifstream file(fileName);
     std::string line;
+    DataContainer container;
 
-    // Read header to determine column indices
-    std::getline(file, line);
-    std::stringstream headerStream(line);
-    std::string cell;
-    std::unordered_map<std::string, int> columnIndices;
-    int columnIndex = 0;
-    while (std::getline(headerStream, cell, ','))
-    {
-        columnIndices[cell] = columnIndex++;
-    }
-
-    // Determine the range for each key
-    int maxIndex = 0, maxIwind = 0, maxIstab = 0;
-    while (std::getline(file, line))
-    {
-        std::stringstream ss(line);
-        int index, iwind, istab;
-        // Extract key values
-        for (int i = 0; i <= columnIndices[indexKey]; ++i)
-            ss >> index;
-        for (int i = columnIndices[indexKey]; i < columnIndices[iwindKey]; ++i)
-            ss.ignore(256, ',');
-        ss >> iwind;
-        for (int i = columnIndices[iwindKey]; i < columnIndices[istabKey]; ++i)
-            ss.ignore(256, ',');
-        ss >> istab;
-
-        // Update max values
-        maxIndex = std::max(maxIndex, index + 1);
-        maxIwind = std::max(maxIwind, iwind + 1);
-        maxIstab = std::max(maxIstab, istab + 1);
-    }
-
-    // Reset file stream to start reading data
-    file.clear();
-    file.seekg(0);
-
-    // Initialize DataContainer with determined sizes
-    DataContainer data(maxIstab, maxIwind, maxIndex);
-
-    // Skip header line
+    // Skip the header line
     std::getline(file, line);
 
-    // Read and populate data
-    double value;
-    while (std::getline(file, line))
-    {
+    // Read each line from the CSV file
+    while (std::getline(file, line)) {
         std::stringstream ss(line);
-        int index, iwind, istab;
+        DataRow row;
 
-        // ... (Read index, iwind, istab as before)
-        // Read index value
-        for (int i = 0; i <= columnIndices[indexKey]; ++i)
-        {
-            if (i == columnIndices[indexKey])
-                ss >> index;
-            else
-                ss.ignore(256, ',');
-        }
+        // Parse each column and store it in the DataRow structure
+        ss >> row.id; // Directly read the id (first column)
+        ss.ignore(1, ','); // Ignore the comma
+        ss >> row.index;
+        ss.ignore(1, ',');
+        ss >> row.x;
+        ss.ignore(1, ',');
+        ss >> row.D0;
+        ss.ignore(1, ',');
+        // Continue for other numerical columns
+        ss >> row.sig_x;
+        ss.ignore(1, ',');
+        ss >> row.sig_y;
+        ss.ignore(1, ',');
+        ss >> row.sig_z;
+        ss.ignore(1, ',');
+        ss >> row.D0U_Q;
+        ss.ignore(1, ',');
+        ss >> row.coef_y;
+        ss.ignore(1, ',');
+        ss >> row.expon_y;
+        ss.ignore(1, ',');
+        ss >> row.coef_z;
+        ss.ignore(1, ',');
+        ss >> row.expon_z;
+        ss.ignore(1, ',');
+        ss >> row.iwind;
+        ss.ignore(1, ',');
+        ss >> row.istab;
+        ss.ignore(1, ',');
+        ss >> row.wind;
+        ss.ignore(1, ',');
+        ss >> row.stab; // Assuming 'stab' is the next value to read
+        ss.ignore(1, ',');
+        std::getline(ss, row.how); // Read the remainder of the line as "how"
 
-        // Read iwind value
-        for (int i = columnIndices[indexKey]; i <= columnIndices[iwindKey]; ++i)
-        {
-            if (i == columnIndices[iwindKey])
-                ss >> iwind;
-            else
-                ss.ignore(256, ',');
-        }
+        //print row data
+        //std::cout << "id: " << row.id << ", index: " << row.index << ", x: " << row.x << ", sig_x: " << row.sig_x << ", sig_y: " << row.sig_y << ", sig_z: " << row.sig_z << ", D0: " << row.D0 << ", D0U_Q: " << row.D0U_Q << ", coef_y: " << row.coef_y << ", expon_y: " << row.expon_y << ", coef_z: " << row.coef_z << ", expon_z: " << row.expon_z << ", iwind: " << row.iwind << ", istab: " << row.istab << ", wind: " << row.wind << ", stab: " << row.stab << ", how: " << row.how << std::endl;
 
-        // Read istab value
-        for (int i = columnIndices[iwindKey]; i <= columnIndices[istabKey]; ++i)
-        {
-            if (i == columnIndices[istabKey])
-                ss >> istab;
-            else
-                ss.ignore(256, ',');
-        }
-
-        // Read and store data in DataContainer
-        for (int i = 0; i < columnIndices.size(); ++i)
-        {
-            ss >> value;
-            if (i == columnIndices["x"])
-                data.x[istab][iwind][index] = value;
-            if (i == columnIndices["sig_x"])
-                data.sig_x[istab][iwind][index] = value;
-            if (i == columnIndices["sig_y"])
-                data.sig_y[istab][iwind][index] = value;
-            if (i == columnIndices["sig_z"])
-                data.sig_z[istab][iwind][index] = value;
-            if (i == columnIndices["D0"])
-                data.D0[istab][iwind][index] = value;
-            if (i == columnIndices["D0U_Q"])
-                data.D0U_Q[istab][iwind][index] = value;
-            if (i == columnIndices["coef_y"])
-                data.coef_y[istab][iwind][index] = value;
-            if (i == columnIndices["expon_y"])
-                data.expon_y[istab][iwind][index] = value;
-            if (i == columnIndices["coef_z"])
-                data.coef_z[istab][iwind][index] = value;
-            if (i == columnIndices["expon_z"])
-                data.expon_z[istab][iwind][index] = value;
-
-            // Add conditions for other data fields
-        }
+        // Add the populated DataRow to the DataContainer
+        container.rows.push_back(row);
     }
 
-    return data;
-};
-
-/*
-int main() {
-    CSVReader reader;
-    DataContainer data = reader.readCSV("hpac_dispersion_coefs.csv", "index", "iwind", "istab");
-    // Use data as needed
-    return 0;
+    return container;
 }
-*/
+DataContainer_v1 CSVReader::readCSV_v1(const std::string &fileName) {
+    std::ifstream file(fileName);
+    std::string line;
+    DataContainer_v1 container;
+
+    // Skip the header line
+    std::getline(file, line);
+
+    // Read each line from the CSV file
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        DataRow_v1 row;
+
+        // Parse each column and store it in the DataRow structure
+        ss >> row.id; // Directly read the id (first column)
+        ss.ignore(1, ','); // Ignore the comma
+        ss >> row.istab;
+        ss.ignore(1, ','); // Ignore the comma
+        ss >> row.speed;
+        ss.ignore(1, ',');
+        ss >> row.stab;
+        ss.ignore(1, ',');
+        ss >> row.x;
+        ss.ignore(1, ',');
+        ss >> row.sig_x;
+        ss.ignore(1, ',');
+        ss >> row.sig_y;
+        ss.ignore(1, ',');
+        ss >> row.sig_z;
+        ss.ignore(1, ',');
+        ss >> row.xv_x;
+        ss.ignore(1, ',');
+        ss >> row.xv_y;
+        ss.ignore(1, ',');
+        ss >> row.xv_z;
+        ss.ignore(1, ',');
+        ss >> row.diff_x;
+        ss.ignore(1, ',');
+        ss >> row.diff_y;
+        ss.ignore(1, ',');
+        ss >> row.diff_z;
+        ss.ignore(1, ',');
+        std::getline(ss, row.pass); // Read the remainder of the line 
+
+        //print row data
+        std::cout << "id: " << row.id << ", istab: " << row.istab << ", speed: " << row.speed << ", stab: " << row.stab << ", x: " << row.x << ", sig_x: " << row.sig_x << ", sig_y: " << row.sig_y << ", sig_z: " << row.sig_z << ", xv_x: " << row.xv_x << ", xv_y: " << row.xv_y << ", xv_z: " << row.xv_z << ", diff_x: " << row.diff_x << ", diff_y: " << row.diff_y << ", diff_z: " << row.diff_z << ", pass: " << row.pass << std::endl;
+
+        // Add the populated DataRow to the DataContainer
+        container.rows.push_back(row);
+    }
+
+    return container;
+}

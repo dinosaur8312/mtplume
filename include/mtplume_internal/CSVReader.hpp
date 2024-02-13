@@ -1,3 +1,6 @@
+#ifndef MTPLUME_CSVREADER_HPP
+#define MTPLUME_CSVREADER_HPP
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -5,27 +8,66 @@
 #include <string>
 #include <unordered_map>
 
-// Class to hold the 3D arrays of data
+struct DataRow {
+    int id;
+    int index;
+    double x; // Assuming "X" represents a numeric value
+    double sig_x;
+    double sig_y;
+    double sig_z;
+    double D0;
+    double D0U_Q;
+    double coef_y;
+    double expon_y;
+    double coef_z;
+    double expon_z;
+    int iwind; // Iwind as integer type
+    int istab; // Istab as integer type
+    double wind;
+    char stab; // Stab as character type
+    std::string how; // How as string type
+};
+
+struct DataRow_v1 {
+    int id;
+    int istab; // Istab as integer type
+    double speed;
+    char stab; // Stab as character type
+    double x; // Assuming "X" represents a numeric value
+    double sig_x;
+    double sig_y;
+    double sig_z;
+    double xv_x;
+    double xv_y;
+    double xv_z;
+    double diff_x;
+    double diff_y;
+    double diff_z;
+    std::string pass; // How as string type
+};
+
+
+
 class DataContainer {
 public:
-    std::vector<std::vector<std::vector<double>>> sig_x; // 3D array for sig_x
-    std::vector<std::vector<std::vector<double>>> sig_y; // 3D array for sig_y
-    std::vector<std::vector<std::vector<double>>> sig_z; // 3D array for sig_z
-    std::vector<std::vector<std::vector<double>>> D0; // 3D array for D0
-    std::vector<std::vector<std::vector<double>>> D0U_Q; // 3D array for D0U/Q
-    std::vector<std::vector<std::vector<double>>> coef_y; // 3D array for coef_y
-    std::vector<std::vector<std::vector<double>>> expon_y; // 3D array for expon_y
-    std::vector<std::vector<std::vector<double>>> coef_z; // 3D array for coef_z
-    std::vector<std::vector<std::vector<double>>> expon_z; // 3D array for expon_z
-
-    // Constructor
-    DataContainer(int istabSize, int iwindSize, int indexSize);
+    std::vector<DataRow> rows; // Vector of DataRow instances
 };
+class DataContainer_v1 {
+public:
+    std::vector<DataRow_v1> rows; // Vector of DataRow instances
+};
+
+
+
 
 // Class to read CSV data and populate DataContainer
 class CSVReader {
 public:
     // Method to read CSV file and populate data
-    DataContainer readCSV(const std::string& fileName, const std::string& indexKey, const std::string& iwindKey, const std::string& istabKey);
+    DataContainer readCSV(const std::string &fileName) ;
+    DataContainer_v1 readCSV_v1(const std::string &fileName) ;
+    //DataContainer readCSV(const std::string& fileName, const std::string& indexKey, const std::string& iwindKey, const std::string& istabKey);
 };
 
+
+#endif // MTPLUME_CSVREADER_HPP
