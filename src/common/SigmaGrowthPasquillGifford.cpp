@@ -154,7 +154,7 @@ void SigmaGrowthPasquillGifford::compareSigmaData(DataContainer coefs, DataConta
 
         if(!flag) continue;
 
-        printf("xk_flag, compareSigmaData, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i,id0, id1, id2, id3);
+       // printf("xk_flag, compareSigmaData, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i,id0, id1, id2, id3);
 
 
         DataRow row0 = coefs.rows[id0];
@@ -172,33 +172,95 @@ void SigmaGrowthPasquillGifford::compareSigmaData(DataContainer coefs, DataConta
         double logx2 = log(x2);
         double logx3 = log(x3);
 
-        printf("xk_flag, compareSigmaData,  logx=%f, logx0 = %f, logx1 = %f, logx2 = %f, logx3 = %f\n", logx, logx0, logx1, logx2, logx3);
+        //printf("xk_flag, compareSigmaData,  logx=%f, logx0 = %f, logx1 = %f, logx2 = %f, logx3 = %f\n", logx, logx0, logx1, logx2, logx3);
 
         double sig_x0 = row0.sig_x;
         double sig_x1 = row1.sig_x;
         double sig_x2 = row2.sig_x;
         double sig_x3 = row3.sig_x;
 
-        printf("xk_flag, compareSigmaData,  sig_x0 = %f, sig_x1 = %f, sig_x2 = %f, sig_x3 = %f\n", sig_x0, sig_x1, sig_x2, sig_x3);
+        double log_sig_x0 = log(sig_x0);
+        double log_sig_x1 = log(sig_x1);
+        double log_sig_x2 = log(sig_x2);
+        double log_sig_x3 = log(sig_x3);
+
+        double sig_y0 = row0.sig_y;
+        double sig_y1 = row1.sig_y;
+        double sig_y2 = row2.sig_y;
+        double sig_y3 = row3.sig_y;
+
+        double log_sig_y0 = log(sig_y0);
+        double log_sig_y1 = log(sig_y1);
+        double log_sig_y2 = log(sig_y2);
+        double log_sig_y3 = log(sig_y3);
+
+        double sig_z0 = row0.sig_z;
+        double sig_z1 = row1.sig_z;
+        double sig_z2 = row2.sig_z;
+        double sig_z3 = row3.sig_z;
+
+      //  printf("xk_flag, compareSigmaData,  sig_x0 = %f, sig_x1 = %f, sig_x2 = %f, sig_x3 = %f\n", sig_x0, sig_x1, sig_x2, sig_x3);
 
         double wx = (logx - logx0) / (logx1 - logx0);
+        //double wx = (x - x0) / (x1 - x0);
 
-        printf("xk_flag, compareSigmaData,  wx = %f\n", wx);
+
 
         double sig_x01 = (1.f-wx)*sig_x0 + wx*sig_x1; 
         double sig_x23 = (1.f-wx)*sig_x2 + wx*sig_x3;
 
-        printf("xk_flag, compareSigmaData,  sig_x01 = %f, sig_x23 = %f\n", sig_x01, sig_x23);
+        double log_sig_x01 = (1.f-wx)*log_sig_x0 + wx*log_sig_x1;
+        double log_sig_x23 = (1.f-wx)*log_sig_x2 + wx*log_sig_x3;
 
-        double wy = (wind - row0.wind) / (row2.wind - row0.wind);
+        double sig_y01 = (1.f-wx)*sig_y0 + wx*sig_y1;
+        double sig_y23 = (1.f-wx)*sig_y2 + wx*sig_y3;
 
-        printf("xk_flag, compareSigmaData,  wy = %f\n", wy);
+        double log_sig_y01 = (1.f-wx)*log_sig_y0 + wx*log_sig_y1;
+        double log_sig_y23 = (1.f-wx)*log_sig_y2 + wx*log_sig_y3;
 
-        double sig_x_coef = (1.f-wy)*sig_x01 + wy*sig_x23; 
+        double sig_z01 = (1.f-wx)*sig_z0 + wx*sig_z1;
+        double sig_z23 = (1.f-wx)*sig_z2 + wx*sig_z3;
+
+//        printf("xk_flag, compareSigmaData,  sig_x01 = %f, sig_x23 = %f\n", sig_x01, sig_x23);
+
+        double w_wind = (wind - row0.wind) / (row2.wind - row0.wind);
+
+        
+//        printf("xk_flag, compareSigmaData,  wy = %f\n", wy);
+
+        double sig_x_coef = (1.f-w_wind)*sig_x01 + w_wind*sig_x23; 
+        double sig_y_coef = (1.f-w_wind)*sig_y01 + w_wind*sig_y23;
+        double sig_z_coef = (1.f-w_wind)*sig_z01 + w_wind*sig_z23;
+
+        double log_sig_x_coef = (1.f-w_wind)*log_sig_x01 + w_wind*log_sig_x23;
+        double log_sig_y_coef = (1.f-w_wind)*log_sig_y01 + w_wind*log_sig_y23;
+
+        double exp_log_sig_x_coef = exp(log_sig_x_coef);
+        double exp_log_sig_y_coef = exp(log_sig_y_coef);
 
         double sig_x = row.sig_x;
+        double sig_y = row.sig_y;
+        double sig_z = row.sig_z;
 
-        printf("xk_flag, compareSigmaData, i=%d, x = %f, istab = %d, wind = %f, sig_x = %f, sig_x_coef = %f\n", i, x, istab, wind, sig_x, sig_x_coef);            
+        double error_x = abs(sig_x - sig_x_coef)/abs(sig_x)*100;
+        double error_logx = abs(sig_x - exp_log_sig_x_coef)/abs(sig_x)*100;
+        double error_y = abs(sig_y - sig_y_coef)/abs(sig_y)*100;
+        double error_z = abs(sig_z - sig_z_coef)/abs(sig_z)*100;
+
+        printf("\ni=%d\n", i);      
+        printf("id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", id0, id1, id2, id3);
+        printf("x = %f, istab = %d, wind = %f \n", x, istab, wind);      
+        printf("wx = %f, w_wind=%f\n", wx, w_wind);
+        printf(" sig_x0 = %f, sig_x1 = %f, sig_x2 = %f, sig_x3 = %f\n", sig_x0, sig_x1, sig_x2, sig_x3);
+        printf(" sig_x01 = %f, sig_x23 = %f\n", sig_x01, sig_x23);
+        printf(" sig_y0 = %f, sig_y1 = %f, sig_y2 = %f, sig_y3 = %f\n", sig_y0, sig_y1, sig_y2, sig_y3);
+        printf(" sig_y01 = %f, sig_y23 = %f\n", sig_y01, sig_y23);
+        printf(" sig_z0 = %f, sig_z1 = %f, sig_z2 = %f, sig_z3 = %f\n", sig_z0, sig_z1, sig_z2, sig_z3);
+        printf(" sig_z01 = %f, sig_z23 = %f\n", sig_z01, sig_z23);
+        printf(" sig_x = %f, sig_x_coef = %f, ERROR_X=%f% \n", sig_x, sig_x_coef, error_x);            
+        printf(" sig_x = %f, sig_x_coef = %f, ERROR_LOGX=%f% \n", sig_x, exp_log_sig_x_coef, error_logx);            
+        printf(" sig_y = %f, sig_y_coef = %f, ERROR_Y=%f% \n", sig_y, sig_y_coef, error_y);
+        printf(" sig_z = %f, sig_z_coef = %f, ERROR_Z=%f% \n", sig_z, sig_z_coef, error_z);            
 
     }
 
