@@ -13,6 +13,10 @@ include_directories(
     include/mtplume_internal
 )
 
+# Add the nlohmann/json include directory
+include_directories(${PROJECT_SOURCE_DIR}/libs/json/include)
+
+
 find_package(CUDA REQUIRED)
 include_directories(${CUDA_INCLUDE_DIRS})
 
