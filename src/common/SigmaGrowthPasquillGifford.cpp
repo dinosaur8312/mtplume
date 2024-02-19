@@ -1,5 +1,4 @@
 #include "SigmaGrowthPasquillGifford.hpp"
-#include "CSVReader.hpp"
 
 // Constructor
 // SigmaGrowthPasquillGifford::SigmaGrowthPasquillGifford(Sensor *sensor, Release *release, ConstantWindMet *met)
@@ -23,9 +22,9 @@ SigmaGrowthPasquillGifford::SigmaGrowthPasquillGifford(Sensor *sensor_ptr, Relea
     areas.resize(numx * numt * numl * numst);
     calcSigmasImpl();
 
-    if (1)
+    if (0)
     {
-        compareCSVdata();
+        //compareCSVdata();
     }
     else
     {
@@ -83,7 +82,7 @@ void SigmaGrowthPasquillGifford::calcSigmasImpl()
     printf("xk_flag, End SigmaGrowthPasquillGifford::calcSigmasImp\n");
 }
 
-
+/*
 void SigmaGrowthPasquillGifford::compareSigmaX(DataContainer_v1 data)
 {
     printf("xk_flag, Begin SigmaGrowthPasquillGifford::compareSigmaX\n");
@@ -279,6 +278,8 @@ void SigmaGrowthPasquillGifford::compareCSVdata()
     delete myreader;
     printf("xk_flag, End SigmaGrowthPasquillGifford::compareCSVdata\n");
 }
+
+*/
 
 void SigmaGrowthPasquillGifford::calcZfunc()
 {

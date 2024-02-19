@@ -15,6 +15,7 @@ include_directories(
 
 # Add the nlohmann/json include directory
 include_directories(${PROJECT_SOURCE_DIR}/libs/json/include)
+include_directories(${PROJECT_SOURCE_DIR}/libs/csv_parser)
 
 
 find_package(CUDA REQUIRED)

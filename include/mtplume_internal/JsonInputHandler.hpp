@@ -1,22 +1,18 @@
 #pragma once
 
 #include <nlohmann/json.hpp>
+#include "SimConfig.hpp"
 #include <string>
 #include <fstream>
 
-class JsonInputHandler {
+class JsonInputHandler
+{
 public:
-    explicit JsonInputHandler(const std::string& inputFileName);
-    void readInput();
+    explicit JsonInputHandler(const std::string &inputFileName = "");
+    static SimConfig processJsonFile(const std::string &filePath);
 
 private:
-    std::string inputJsonPath;
-    std::string inputCSVPath;
-    std::string outputCSVPath;
-    std::string basePath = "./tests/unit_tests/";
-    std::string currentPath = "./";
-
-    std::string findJsonFile(const std::string& fileName);
-    std::string resolveFilePath(const std::string& fileName, bool searchInTests = true);
-    void processJsonFile(const std::string& filePath);
+    static std::string findJsonFile(const std::string &fileName);
+    static std::string basePath;
+    static std::string currentPath;
 };

@@ -1,65 +1,56 @@
+
 #include "JsonInputHandler.hpp"
 #include <filesystem>
 #include <iostream>
+#include <fstream>
+#include <nlohmann/json.hpp>
+#include <stdexcept>
 
 namespace fs = std::filesystem;
 
+// Initialize static members
+std::string JsonInputHandler::basePath = "/home/xianlong/Code/mtplume/tests/unit_tests/";
+std::string JsonInputHandler::currentPath = "./";
+
 JsonInputHandler::JsonInputHandler(const std::string& inputFileName) {
-    inputJsonPath = findJsonFile(inputFileName);
-    if (inputJsonPath.empty()) {
-        throw std::runtime_error("JSON input file not found.");
-    }
-    processJsonFile(inputJsonPath);
+    // Constructor logic here (if needed)
 }
 
-void JsonInputHandler::readInput() {
-    // Here you can implement logic that uses inputCSVPath and outputCSVPath
-    // For example, reading the CSV file, processing it, and writing to the output CSV file.
-}
-
-std::string JsonInputHandler::findJsonFile(const std::string& fileName) {
-    if (fs::exists(currentPath + fileName)) {
-        return currentPath + fileName;
-    } else if (fs::exists(basePath + fileName)) {
-        return basePath + fileName;
-    } else if (fileName.empty()) { // Use default if no argument provided
-        return basePath + "input_default.json";
-    }
-    return ""; // Return empty string if file not found
-}
-
-std::string JsonInputHandler::resolveFilePath(const std::string& fileName, bool searchInTests) {
-    if (fs::path(fileName).is_absolute()) {
-        return fileName; // Use absolute path directly
-    }
-
-    auto currentDirPath = currentPath + fileName;
-    auto testDirPath = basePath + fileName;
-    if (fs::exists(currentDirPath)) {
-        return currentDirPath;
-    } else if (searchInTests && fs::exists(testDirPath)) {
-        return testDirPath;
-    }
-    throw std::runtime_error("CSV file not found: " + fileName);
-}
-
-void JsonInputHandler::processJsonFile(const std::string& filePath) {
-    std::ifstream file(filePath);
+SimConfig JsonInputHandler::processJsonFile(const std::string& filePath) {
+    std::string resolvedPath = findJsonFile(filePath);
+    //print the path
+    std::cout << "Input Json Config File: " << resolvedPath << std::endl;
+    std::ifstream file(resolvedPath);
     if (!file.is_open()) {
-        throw std::runtime_error("Could not open JSON input file: " + filePath);
+        throw std::runtime_error("Could not open JSON input file: " + resolvedPath);
     }
 
     nlohmann::json j;
     file >> j;
+    file.close();
 
-    // Resolve paths for inputCSV and outputCSV
-    if (!j.contains("inputCSV") || j["inputCSV"].get<std::string>().empty()) {
-        throw std::runtime_error("inputCSV key is missing or blank.");
-    }
-    inputCSVPath = resolveFilePath(j["inputCSV"].get<std::string>());
+    SimConfig config;
+    config.coefCSVPath = j.value("coefs_CSV", "");
+    config.refCSVPath = j.value("reference_CSV", "");
+    config.outputCSVPath = j.value("outputCSV", "");
+    //print the path
+    std::cout << "input coef CSV: " << config.coefCSVPath << std::endl;
+    std::cout << "input ref CSV: " << config.refCSVPath << std::endl;
+    std::cout << "outputCSV: " << config.outputCSVPath << std::endl;
+    // Populate other fields as necessary
 
-    if (!j.contains("outputCSV") || j["outputCSV"].get<std::string>().empty()) {
-        throw std::runtime_error("outputCSV key is missing or blank.");
+    return config;
+}
+
+std::string JsonInputHandler::findJsonFile(const std::string& fileName) {
+    std::string defaultFileName = "input_default.json";
+    if (!fileName.empty()) {
+        if (fs::exists(currentPath + fileName)) {
+            return currentPath + fileName;
+        } else if (fs::exists(basePath + fileName)) {
+            return basePath + fileName;
+        }
     }
-    outputCSVPath = resolveFilePath(j["outputCSV"].get<std::string>(), false);
+    // Fallback to default file if fileName is empty or not found
+    return basePath + defaultFileName;
 }
