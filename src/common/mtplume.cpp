@@ -20,11 +20,11 @@ int main(int argc, char *argv[])
         SimConfig config = JsonInputHandler::processJsonFile(configFilePath);
 
         // Further processing with config data...
-        auto coefs = CSVParser::parseCoefCSV(config.coefCSVPath);
+        //auto coefs = CSVParser::parseCoefCSV(config.coefCSVPath);
 
-        auto refData = CSVParser::parseRefCSV(config.refCSVPath); 
+        //auto refData = CSVParser::parseRefCSV(config.refCSVPath); 
 
-        SigmaInterp::compareCSVdata(coefs, refData);
+        SigmaInterp::compareCSVdata(config);
     }
     catch (const std::exception &e)
     {

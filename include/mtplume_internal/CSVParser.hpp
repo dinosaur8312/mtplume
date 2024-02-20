@@ -28,24 +28,6 @@ struct CSVDataRow
     // std::string how; // How as string type
 };
 
-struct DataRow
-{
-    // int id;
-    int istab; // Istab as integer type
-    double wind;
-    // char stab; // Stab as character type
-    double x; // Assuming "X" represents a numeric value
-    double sig_x;
-    double sig_y;
-    double sig_z;
-    // double xv_x;
-    // double xv_y;
-    // double xv_z;
-    // double diff_x;
-    // double diff_y;
-    // double diff_z;
-    // std::string pass; // How as string type
-};
 
 class CSVParser
 {
