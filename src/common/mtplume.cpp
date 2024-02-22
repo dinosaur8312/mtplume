@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Error processing JSON input file: " << e.what() << std::endl;
+        std::cerr << "Error processing input file: " << e.what() << std::endl;
         return 1;
     }
 
