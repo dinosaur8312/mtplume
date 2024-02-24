@@ -45,6 +45,8 @@ public:
         double xmax = -9999999.f;
         double windmin = 9999999.f;
         double windmax = -9999999.f;
+
+
         for (int i = 0; i < coefs.size(); i++)
         {
             auto row = coefs[i];
@@ -66,6 +68,7 @@ public:
         else
             outputFile << "ID,istab,wind,x,y,z,sig_x_calc,sig_y_calc,sig_z_calc,sig_x_ref,sig_y_ref,sig_z_ref,err_x,err_y,err_z,pass\n";
 
+        int pass_count = 0;
         // loop over all rows in data
         for (int i = 0; i < data.size(); i++)
         {
@@ -256,13 +259,17 @@ public:
             outputFile << sig_x_cal << "," << sig_y_cal << "," << sig_z_cal << ",";
             outputFile << sig_x_ref << "," << sig_y_ref << "," << sig_z_ref << ",";
             outputFile << err_x << "," << err_y << "," << err_z << ",";
-            if (err_x < 1.f && err_y < 1.f && err_z < 1.f)
+            if (err_x < 0.1f && err_y < 0.1f && err_z < 0.1f)
+            {
                 outputFile << "Yes"
                            << "\n";
+                pass_count++;
+            }
             else
+            {
                 outputFile << "No"
                            << "\n";
-
+            }
             /*
             outputFile << exp_log_sig_x_coef << "," << exp_log_sig_y_coef << "," << exp_log_sig_z_coef << ",";
             outputFile << sig_x << "," << sig_y << "," << sig_z << ",";
@@ -277,6 +284,9 @@ public:
         } // end of loop over all rows in data
         outputFile.close();
         std::cout << "CSV file has been written successfully.\n";
+
+        double pass_rate = (double)pass_count / (double)data.size() * 100;
+        std::cout << "Pass rate = " << pass_rate << "%\n";
 
         printf("xk_flag, ompareCSVdata\n");
     }

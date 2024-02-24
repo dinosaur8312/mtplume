@@ -298,15 +298,16 @@ void compareSigmaData(std::vector<CSVDataRow> coefs, const int id0, const int id
 
     double logx = log(x);
 
-    double wx = id0 == id1 ? 0.f : (logx - logx0) / (logx1 - logx0);
-    printf("xk_flag, compareSigmaData,  logx = %f, wx = %f\n", logx, wx);
+    double wx01 = id0 == id1 ? 0.f : (logx - logx0) / (logx1 - logx0);
+    double wx23 = id2 == id3 ? 0.f : (logx - logx2) / (logx3 - logx2);
+    printf("xk_flag, compareSigmaData,  logx = %f, wx01=%f, wx23=%f\n", logx, wx01, wx23);
     // double wx = (x - x0) / (x1 - x0);
 
     // double sig_x01 = (1.f - wx) * sig_x0 + wx * sig_x1;
     // double sig_x23 = (1.f - wx) * sig_x2 + wx * sig_x3;
 
-    double log_sig_x01 = (1.f - wx) * log_sig_x0 + wx * log_sig_x1;
-    double log_sig_x23 = (1.f - wx) * log_sig_x2 + wx * log_sig_x3;
+    double log_sig_x01 = (1.f - wx01) * log_sig_x0 + wx01 * log_sig_x1;
+    double log_sig_x23 = (1.f - wx23) * log_sig_x2 + wx23 * log_sig_x3;
     printf("xk_flag, compareSigmaData,  log_sig_x01 = %f, log_sig_x23 = %f\n", log_sig_x01, log_sig_x23);
 
     // double sig_y01 = (1.f - wx) * sig_y0 + wx * sig_y1;
