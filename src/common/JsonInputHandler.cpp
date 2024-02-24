@@ -9,7 +9,7 @@
 namespace fs = std::filesystem;
 
 // Initialize static members
-std::string JsonInputHandler::basePath = "/home/xianlong/Code/mtplume/tests/unit_tests/";
+std::string JsonInputHandler::basePath = "../tests/unit_tests/";
 std::string JsonInputHandler::currentPath = "./";
 
 JsonInputHandler::JsonInputHandler(const std::string& inputFileName) {

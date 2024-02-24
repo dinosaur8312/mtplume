@@ -5,6 +5,7 @@
 #include <fstream>
 #include "CSVParser.hpp"
 #include "SimConfig.hpp"
+#define PRTCHECK 0
 void findFourCoefs(std::vector<CSVDataRow> coefs, const int istab, const float wind, const float x,
                    int &id0, int &id1, int &id2, int &id3, bool &flag);
 void compareSigmaData(std::vector<CSVDataRow> coefs, const int id0, const int id1, const int id2, const int id3,
@@ -17,8 +18,9 @@ class SigmaInterp
 public:
     static void compareCSVdata(SimConfig &config)
     {
+        #if(PRTCHECK)
         printf("xk_flag, Begin compareCSVdata\n");
-
+        #endif
         // Further processing with config data...
         auto coefs = CSVParser::parseCoefCSV(config.coefCSVPath);
 
@@ -46,7 +48,6 @@ public:
         double windmin = 9999999.f;
         double windmax = -9999999.f;
 
-
         for (int i = 0; i < coefs.size(); i++)
         {
             auto row = coefs[i];
@@ -61,7 +62,7 @@ public:
             if (wind > windmax)
                 windmax = wind;
         }
-        printf("xmin = %f, xmax = %f, windmin = %f, windmax = %f\n", xmin, xmax, windmin, windmax);
+        // printf("xmin = %f, xmax = %f, windmin = %f, windmax = %f\n", xmin, xmax, windmin, windmax);
 
         if (computeMode == 0)
             outputFile << "ID,istab,wind,x,sig_x_calc,sig_y_calc,sig_z_calc,sig_x_ref,sig_y_ref,sig_z_ref,err_x,err_y,err_z,pass\n";
@@ -72,7 +73,6 @@ public:
         // loop over all rows in data
         for (int i = 0; i < data.size(); i++)
         {
-            printf("\ni=%d\n", i);
             auto row = data[i];
             double x = row.x;
             double y, z;
@@ -80,10 +80,12 @@ public:
             double wind = row.wind;
             outputFile << i << "," << istab << "," << wind << "," << x << ",";
 
-            // printf(" istab = %d, wind = %f \n", istab, wind);
-            // print all row data
+// printf(" istab = %d, wind = %f \n", istab, wind);
+// print all row data
+#if (PRTCHECK)
+            printf("\ni=%d\n", i);
             printf("row.istab: %d, row.wind: %f, row.x: %f, row.y: %f, row.z: %f, row.sig_x: %f, row.sig_y: %f, row.sig_z: %f\n", row.istab, row.wind, row.x, row.y, row.z, row.sig_x, row.sig_y, row.sig_z);
-
+#endif
             if (x < xmin)
                 x = xmin;
             if (x > xmax)
@@ -91,20 +93,15 @@ public:
             // double logx = log(x);
             // double logy, logz;
 
-            printf("x = %f \n", x);
             if (computeMode == 1)
             {
                 y = row.y;
                 z = row.z;
                 outputFile << y << "," << z << ",";
-                printf("y = %f \n", y);
-                printf("z = %f \n", z);
                 y = y < xmin ? xmin : y;
                 y = y > xmax ? xmax : y;
                 z = z < xmin ? xmin : z;
                 z = z > xmax ? xmax : z;
-                //                logy = log(y);
-                //              logz = log(z);
             }
 
             int id0, id1, id2, id3;
@@ -112,10 +109,10 @@ public:
             float sig_x_ref, sig_y_ref, sig_z_ref;
             float sig_x_cal, sig_y_cal, sig_z_cal;
             float err_x, err_y, err_z;
-            findFourCoefs(coefs, istab, wind, x,  id0, id1, id2, id3, flag);
+            findFourCoefs(coefs, istab, wind, x, id0, id1, id2, id3, flag);
+#if (PRTCHECK)
             printf("xk_flag, compareSigmaData, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
-            //if (!flag)
-              //  continue;
+#endif
             compareSigmaData(coefs, id0, id1, id2, id3, x, row, sig_x_ref, sig_x_cal, err_x, 0);
 
             if (computeMode == 0)
@@ -125,137 +122,23 @@ public:
             }
             else
             {
-                findFourCoefs(coefs, istab, wind, y,  id0, id1, id2, id3, flag );
+                findFourCoefs(coefs, istab, wind, y, id0, id1, id2, id3, flag);
+#if (PRTCHECK)
                 printf("xk_flag, compareSigmaData, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
+#endif
                 compareSigmaData(coefs, id0, id1, id2, id3, y, row, sig_y_ref, sig_y_cal, err_y, 1);
-                findFourCoefs(coefs, istab, wind, z,  id0, id1, id2, id3, flag);
+                findFourCoefs(coefs, istab, wind, z, id0, id1, id2, id3, flag);
+#if (PRTCHECK)
                 printf("xk_flag, compareSigmaData, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
+#endif
                 compareSigmaData(coefs, id0, id1, id2, id3, z, row, sig_z_ref, sig_z_cal, err_z, 2);
             }
-            /*
-            if(i==15)
-            {
-                outputFile.close();
-                exit(0);
-            }
-            */
-            /*
-            auto row0 = coefs[id0];
-            auto row1 = coefs[id1];
-            auto row2 = coefs[id2];
-            auto row3 = coefs[id3];
 
-            double x0 = row0.x;
-            double x1 = row1.x;
-            double x2 = row2.x;
-            double x3 = row3.x;
-
-            double logx0 = log(x0);
-            double logx1 = log(x1);
-            double logx2 = log(x2);
-            double logx3 = log(x3);
-
-            // printf("xk_flag, compareSigmaData,  logx=%f, logx0 = %f, logx1 = %f, logx2 = %f, logx3 = %f\n", logx, logx0, logx1, logx2, logx3);
-
-            double sig_x0 = row0.sig_x;
-            double sig_x1 = row1.sig_x;
-
-            double sig_x2 = row2.sig_x;
-            double sig_x3 = row3.sig_x;
-
-            double log_sig_x0 = log(sig_x0);
-            double log_sig_x1 = log(sig_x1);
-            double log_sig_x2 = log(sig_x2);
-            double log_sig_x3 = log(sig_x3);
-
-            double sig_y0 = row0.sig_y;
-            double sig_y1 = row1.sig_y;
-            double sig_y2 = row2.sig_y;
-            double sig_y3 = row3.sig_y;
-
-            double log_sig_y0 = log(sig_y0);
-            double log_sig_y1 = log(sig_y1);
-            double log_sig_y2 = log(sig_y2);
-            double log_sig_y3 = log(sig_y3);
-
-            double sig_z0 = row0.sig_z;
-            double sig_z1 = row1.sig_z;
-            double sig_z2 = row2.sig_z;
-            double sig_z3 = row3.sig_z;
-
-            double log_sig_z0 = log(sig_z0);
-            double log_sig_z1 = log(sig_z1);
-            double log_sig_z2 = log(sig_z2);
-            double log_sig_z3 = log(sig_z3);
-
-            //  printf("xk_flag, compareSigmaData,  sig_x0 = %f, sig_x1 = %f, sig_x2 = %f, sig_x3 = %f\n", sig_x0, sig_x1, sig_x2, sig_x3);
-
-            double wx = (logx - logx0) / (logx1 - logx0);
-            // double wx = (x - x0) / (x1 - x0);
-
-            // double sig_x01 = (1.f - wx) * sig_x0 + wx * sig_x1;
-            // double sig_x23 = (1.f - wx) * sig_x2 + wx * sig_x3;
-
-            double log_sig_x01 = (1.f - wx) * log_sig_x0 + wx * log_sig_x1;
-            double log_sig_x23 = (1.f - wx) * log_sig_x2 + wx * log_sig_x3;
-
-            // double sig_y01 = (1.f - wx) * sig_y0 + wx * sig_y1;
-            // double sig_y23 = (1.f - wx) * sig_y2 + wx * sig_y3;
-
-            double log_sig_y01 = (1.f - wx) * log_sig_y0 + wx * log_sig_y1;
-            double log_sig_y23 = (1.f - wx) * log_sig_y2 + wx * log_sig_y3;
-
-            double log_sig_z01 = (1.f - wx) * log_sig_z0 + wx * log_sig_z1;
-            double log_sig_z23 = (1.f - wx) * log_sig_z2 + wx * log_sig_z3;
-
-            // double sig_z01 = (1.f - wx) * sig_z0 + wx * sig_z1;
-            // double sig_z23 = (1.f - wx) * sig_z2 + wx * sig_z3;
-
-            //        printf("xk_flag, compareSigmaData,  sig_x01 = %f, sig_x23 = %f\n", sig_x01, sig_x23);
-
-            double w_wind = id0 == id2 ? 0.f : (wind - row0.wind) / (row2.wind - row0.wind);
-
-            //        printf("xk_flag, compareSigmaData,  wy = %f\n", wy);
-
-            // double sig_x_coef = (1.f - w_wind) * sig_x01 + w_wind * sig_x23;
-            // double sig_y_coef = (1.f - w_wind) * sig_y01 + w_wind * sig_y23;
-            // double sig_z_coef = (1.f - w_wind) * sig_z01 + w_wind * sig_z23;
-
-            double log_sig_x_coef = (1.f - w_wind) * log_sig_x01 + w_wind * log_sig_x23;
-            double log_sig_y_coef = (1.f - w_wind) * log_sig_y01 + w_wind * log_sig_y23;
-            double log_sig_z_coef = (1.f - w_wind) * log_sig_z01 + w_wind * log_sig_z23;
-
-            double exp_log_sig_x_coef = exp(log_sig_x_coef);
-            double exp_log_sig_y_coef = exp(log_sig_y_coef);
-            double exp_log_sig_z_coef = exp(log_sig_z_coef);
-
-            double sig_x = row.sig_x;
-            double sig_y = row.sig_y;
-            double sig_z = row.sig_z;
-
-            // double error_x = abs(sig_x - sig_x_coef) / abs(sig_x) * 100;
-            double error_logx = abs(sig_x - exp_log_sig_x_coef) / abs(sig_x) * 100;
-            double error_logy = abs(sig_y - exp_log_sig_y_coef) / abs(sig_y) * 100;
-            double error_logz = abs(sig_z - exp_log_sig_z_coef) / abs(sig_z) * 100;
-
-            // double error_z = abs(sig_z - sig_z_coef) / abs(sig_z) * 100;
-
-            */
-
-            // printf("id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", id0, id1, id2, id3);
-            //  printf("wx = %f, w_wind=%f\n", wx, w_wind);
+#if (PRTCHECK)
             printf(" sig_x = %f, sig_x_coef = %f, ERROR_LOGX=%f% \n", sig_x_ref, sig_x_cal, err_x);
             printf(" sig_y = %f, sig_y_coef = %f, ERROR_LOGY=%f% \n", sig_y_ref, sig_y_cal, err_y);
             printf(" sig_z = %f, sig_z_coef = %f, ERROR_LOGZ=%f% \n", sig_z_ref, sig_z_cal, err_z);
-
-            /*
-                printf(" sig_x0 = %f, sig_x1 = %f, sig_x2 = %f, sig_x3 = %f\n", sig_x0, sig_x1, sig_x2, sig_x3);
-                printf(" sig_y0 = %f, sig_y1 = %f, sig_y2 = %f, sig_y3 = %f\n", sig_y0, sig_y1, sig_y2, sig_y3);
-                printf(" sig_z0 = %f, sig_z1 = %f, sig_z2 = %f, sig_z3 = %f\n", sig_z0, sig_z1, sig_z2, sig_z3);
-                printf(" sig_x = %f, sig_x_coef = %f, ERROR_LOGX=%f% \n", sig_x, exp_log_sig_x_coef, error_logx);
-                printf(" sig_y = %f, sig_y_coef = %f, ERROR_LOGY=%f% \n", sig_y, exp_log_sig_y_coef, error_logy);
-                printf(" sig_z = %f, sig_z_coef = %f, ERROR_LOGZ=%f% \n", sig_z, exp_log_sig_z_coef, error_logz);
-    */
+#endif
             outputFile << sig_x_cal << "," << sig_y_cal << "," << sig_z_cal << ",";
             outputFile << sig_x_ref << "," << sig_y_ref << "," << sig_z_ref << ",";
             outputFile << err_x << "," << err_y << "," << err_z << ",";
@@ -270,24 +153,17 @@ public:
                 outputFile << "No"
                            << "\n";
             }
-            /*
-            outputFile << exp_log_sig_x_coef << "," << exp_log_sig_y_coef << "," << exp_log_sig_z_coef << ",";
-            outputFile << sig_x << "," << sig_y << "," << sig_z << ",";
-            outputFile << error_logx << "," << error_logy << "," << error_logz << ",";
-            if (error_logx < 1.f && error_logy < 1.f && error_logz < 1.f)
-                outputFile << "Yes"
-                           << "\n";
-            else
-                outputFile << "No"
-                           << "\n";
-                           */
         } // end of loop over all rows in data
         outputFile.close();
         std::cout << "CSV file has been written successfully.\n";
 
         double pass_rate = (double)pass_count / (double)data.size() * 100;
+        //print total number of test cases
+        std::cout << "Total number of test cases = " << data.size() << "\n";
         std::cout << "Pass rate = " << pass_rate << "%\n";
 
-        printf("xk_flag, ompareCSVdata\n");
+#if (PRTCHECK)
+        printf("xk_flag, compareCSVdata\n");
+#endif
     }
 };
