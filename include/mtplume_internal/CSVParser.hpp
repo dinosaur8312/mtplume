@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include "SimConfig.hpp"
 
 struct CSVDataRow
 {
@@ -46,14 +47,19 @@ public:
         }
         return rows;
     }
-    static std::vector<CSVDataRow> parseRefCSV(const std::string &filePath)
+    static std::vector<CSVDataRow> parseRefCSV(const SimConfig &config)
     {
         std::vector<CSVDataRow> rows;
 
         // Check if the file name ends with "_02.csv"
-        bool isExtendedFormat = filePath.size() >= 7 && filePath.substr(filePath.size() - 7) == "_02.csv";
+        //bool isExtendedFormat = filePath.size() >= 7 && filePath.substr(filePath.size() - 7) == "_02.csv";
 
-        if (isExtendedFormat)
+        auto filePath = config.refCSVPath;
+
+        //print computeMode
+        std::cout << "computeMode: " << config.computeMode << std::endl;
+
+        if (config.computeMode ==1)
         {
             // For *_02.csv files, read 8 columns
             io::CSVReader<8, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
@@ -62,6 +68,18 @@ public:
             while (in.read_row(row.istab, row.wind, row.x, row.y, row.z, row.sig_x, row.sig_y, row.sig_z))
             {
                 //printf("row.istab: %d, row.wind: %f, row.x: %f, row.y: %f, row.z: %f, row.sig_x: %f, row.sig_y: %f, row.sig_z: %f\n", row.istab, row.wind, row.x, row.y, row.z, row.sig_x, row.sig_y, row.sig_z);
+                rows.push_back(row);
+            }
+        }
+        else if(config.computeMode == 2)
+        {
+            io::CSVReader<6, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
+            in.read_header(io::ignore_extra_column, "iplot", "zrcp", "zplume", "hml","sigz", "zfunc");
+            CSVDataRow row;
+            while (in.read_row(row.istab, row.x, row.y, row.z, row.sig_z, row.wind))
+            {
+                row.sig_x = std::nan("");
+                row.sig_y = std::nan("");
                 rows.push_back(row);
             }
         }

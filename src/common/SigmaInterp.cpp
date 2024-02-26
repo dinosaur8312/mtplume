@@ -193,5 +193,43 @@ void compareSigmaData(std::vector<CSVDataRow> coefs, const int id0, const int id
         sig_x = row.sig_z;
 
     error_logx = abs(sig_x - exp_log_sig_x_coef) / abs(sig_x) * 100;
+}
 
+void compareZfunction(std::vector<CSVDataRow> data, std::ofstream &outputFile)
+{
+
+    outputFile << "ID,iplot,zrcp,zplume,hml,sig_z,zFunc_calc,zFunc_ref,error,pass\n";
+    int pass_count = 0;
+    for (int i = 0; i < data.size(); i++)
+    {
+        auto row = data[i];
+        int iplot = row.istab;
+        double zFunc = row.wind;
+        double zrcp = row.x;
+        double zplume = row.y;
+        double hml = row.z;
+        double sig_z = row.sig_z;
+
+        float zfunc_calc = zFunction(zrcp, zplume, hml, sig_z);
+
+        float error_zfunc = abs(zFunc - zfunc_calc) / abs(zFunc) * 100;
+
+        outputFile << i << "," << iplot << "," << zrcp << "," << zplume << "," << hml << "," << sig_z << "," << zfunc_calc << "," << zFunc << "," << error_zfunc << ",";
+
+        if (error_zfunc < 0.1f)
+        {
+            outputFile << "Yes"
+                       << "\n";
+            pass_count++;
+        }
+        else
+        {
+            outputFile << "No"
+                       << "\n";
+        }
+    }
+    double pass_rate = (double)pass_count / (double)data.size() * 100;
+    // print total number of test cases
+    std::cout << "Total number of test cases = " << data.size() << "\n";
+    std::cout << "Pass rate = " << pass_rate << "%\n";
 }

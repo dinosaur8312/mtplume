@@ -1,0 +1,5 @@
+{
+    "coefs_CSV": "/home/xianlong/Code/mtplume/tests/unit_tests/hpac_dispersion_coefs.csv",
+    "reference_CSV": "/home/xianlong/Code/mtplume/tests/unit_tests/test_zFunction_module.csv",
+    "outputCSV": "output_zfunc.csv"
+}

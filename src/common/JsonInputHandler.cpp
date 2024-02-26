@@ -5,6 +5,7 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <stdexcept>
+#include <string>
 
 namespace fs = std::filesystem;
 
@@ -30,9 +31,21 @@ SimConfig JsonInputHandler::processJsonFile(const std::string& filePath) {
     file.close();
 
     SimConfig config;
+
+
+
     config.coefCSVPath = j.value("coefs_CSV", "");
     config.refCSVPath = j.value("reference_CSV", "");
     config.outputCSVPath = j.value("outputCSV", "");
+    // Set computeMode based on filename
+    if (config.refCSVPath.find("_02") != std::string::npos) {
+        config.computeMode = 1;
+    } else if (config.refCSVPath.find("zFunc") != std::string::npos) {
+        config.computeMode = 2;
+    }
+    else {
+        config.computeMode = 0;
+    }
     //print the path
     std::cout << "input coef CSV: " << config.coefCSVPath << std::endl;
     std::cout << "input ref CSV: " << config.refCSVPath << std::endl;

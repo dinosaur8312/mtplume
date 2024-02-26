@@ -12,35 +12,67 @@ void compareSigmaData(std::vector<CSVDataRow> coefs, const int id0, const int id
                       const float x, CSVDataRow row,
                       float &sig_x, float &exp_log_sig_x_coef, float &error_logx,
                       const int sigid);
+void compareZfunction(std::vector<CSVDataRow> data, std::ofstream &outputFile);
+
+template <int N>
+float zReflections(float zrcp, float zplume, float hml, float sigz)
+{
+    float arg = (zrcp - zplume) / sigz;
+    if (fabs(arg) > 4.f)
+        return 0.f;
+    float zf = exp(-0.5f * arg * arg);
+    if constexpr (N < 5)
+    {
+        if (0.0f < zplume)
+            zf += zReflections<N + 1>(zrcp, -zplume, hml, sigz);
+        if (zplume < hml)
+            zf += zReflections<N + 1>(zrcp, 2.0f * hml - zplume, hml, sigz);
+    }
+    else
+    {
+        hml;
+    }
+    return zf;
+}
+
+inline float zFunction(float zrcp, float zplume, float hml, float sigz)
+{
+    if (hml < zrcp)
+        return 0.f;
+    if (hml < sigz)
+        return 1.f / hml;
+    zplume = zplume < 1.0e-3 ? 1.0e-3 : zplume;
+    zplume = (hml - 1.0e-3) <= zplume ? hml - 1.0e-3 : zplume;
+    static constexpr float INV_ROOT2PI = 0.3989422804014327;
+    return INV_ROOT2PI / sigz * zReflections<0>(zrcp, zplume, hml, sigz);
+}
+
 class SigmaInterp
 {
 
 public:
     static void compareCSVdata(SimConfig &config)
     {
-        #if(PRTCHECK)
+#if (PRTCHECK)
         printf("xk_flag, Begin compareCSVdata\n");
-        #endif
-        // Further processing with config data...
-        auto coefs = CSVParser::parseCoefCSV(config.coefCSVPath);
-
-        auto data = CSVParser::parseRefCSV(config.refCSVPath);
-
-        int computeMode;
-        if (std::isnan(data[0].y))
-        {
-            computeMode = 0;
-        }
-        else
-        {
-            computeMode = 1;
-        }
+#endif
+        int computeMode = config.computeMode;
 
         std::ofstream outputFile(config.outputCSVPath);
         if (!outputFile)
         {
             throw std::runtime_error("Cannot open the file: " + config.outputCSVPath);
         }
+        auto data = CSVParser::parseRefCSV(config);
+
+        if (computeMode == 2)
+        {
+            compareZfunction(data, outputFile);
+            return;
+        }
+
+        // Further processing with config data...
+        auto coefs = CSVParser::parseCoefCSV(config.coefCSVPath);
 
         // find min and max wind speed and x in coefs table
         double xmin = 9999999.f;
@@ -158,12 +190,13 @@ public:
         std::cout << "CSV file has been written successfully.\n";
 
         double pass_rate = (double)pass_count / (double)data.size() * 100;
-        //print total number of test cases
+        // print total number of test cases
         std::cout << "Total number of test cases = " << data.size() << "\n";
         std::cout << "Pass rate = " << pass_rate << "%\n";
 
 #if (PRTCHECK)
         printf("xk_flag, compareCSVdata\n");
 #endif
+        return;
     }
 };
