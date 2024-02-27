@@ -1,5 +1,5 @@
 {
-    "coefs_CSV": "/home/xianlong/Code/mtplume/tests/unit_tests/hpac_dispersion_coefs.csv",
-    "reference_CSV": "/home/xianlong/Code/mtplume/tests/unit_tests/test_virtual_sources_01.csv",
+    "coefs_CSV": "../tests/unit_tests/hpac_dispersion_coefs.csv",
+    "reference_CSV": "../tests/unit_tests/test_virtual_sources_01.csv",
     "outputCSV": "output_data.csv"
 }
