@@ -212,7 +212,7 @@ void compareZfunction(std::vector<CSVDataRow> data, std::ofstream &outputFile)
 
         float zfunc_calc = zFunction(zrcp, zplume, hml, sig_z);
 
-        float error_zfunc = abs(zFunc - zfunc_calc) / abs(zFunc) * 100;
+        float error_zfunc = abs(zFunc)>1E-6? abs(zFunc - zfunc_calc) / abs(zFunc) * 100 : abs(zFunc - zfunc_calc) ;
 
         outputFile << i << "," << iplot << "," << zrcp << "," << zplume << "," << hml << "," << sig_z << "," << zfunc_calc << "," << zFunc << "," << error_zfunc << ",";
 

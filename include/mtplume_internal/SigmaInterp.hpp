@@ -37,14 +37,40 @@ float zReflections(float zrcp, float zplume, float hml, float sigz)
 
 inline float zFunction(float zrcp, float zplume, float hml, float sigz)
 {
-    if (hml < zrcp)
+    if((hml < zrcp)&&(zplume<=hml))
         return 0.f;
-    if (hml < sigz)
-        return 1.f / hml;
-    zplume = zplume < 1.0e-3 ? 1.0e-3 : zplume;
-    zplume = (hml - 1.0e-3) <= zplume ? hml - 1.0e-3 : zplume;
+
+
     static constexpr float INV_ROOT2PI = 0.3989422804014327;
-    return INV_ROOT2PI / sigz * zReflections<0>(zrcp, zplume, hml, sigz);
+    float zrefl = 0.f;
+    if(zplume<=hml)
+    {
+        if(zrcp>hml)
+            return 0.f;
+        if(sigz>hml)
+            return 1.f / hml;
+        zplume = zplume < 1.0e-3 ? 1.0e-3 : zplume;
+
+        if(zplume<=hml)
+            zplume = (hml-0.001f)<zplume?hml-0.001f:zplume;
+
+        zrefl = zReflections<0>(zrcp, zplume, hml, sigz);
+        
+    }
+    else
+    {
+        if(zrcp<=hml)
+            return 0.f;
+        float arg = (zrcp - zplume) / sigz;
+
+        zrefl = exp(-0.5f * arg * arg);
+
+        arg = (zrcp +2.0f * hml - zplume) / sigz;
+        zrefl += exp(-0.5f * arg * arg);
+    }
+
+
+    return INV_ROOT2PI / sigz * zrefl;
 }
 
 class SigmaInterp
