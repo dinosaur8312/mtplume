@@ -373,7 +373,7 @@ void generateSample(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs,
             windmax = wind;
     }
 
-    outputFile << "ID,istab,wind,x,y,z,sig_x,sig_y,sig_z, zfunc,concentration, dose\n";
+    outputFile << "ID,istab,wind,x,y,z,icurve,t,sig_x,sig_y,sig_z, zfunc, cpeak, concentration, dinf, dose\n";
 
     int pass_count = 0;
     // loop over all rows in data
@@ -414,10 +414,12 @@ void generateSample(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs,
         double dosage = centerlineDosage(
             row.x, row.t, row.mass, row.wind, zfunc, row.sig_x, row.sig_y);
 
+        double defaultnan = -999.;
         outputFile << i << "," << istab << "," << wind << ",";
         outputFile << row.x << "," << row.y << "," << row.z << ",";
+        outputFile << row.icurve<<","<<row.t<< ",";
         outputFile << row.sig_x << "," << row.sig_y << "," << row.sig_z << ",";
-        outputFile << zfunc << "," << concentration <<","<< dosage << "\n";
+        outputFile << zfunc << "," << defaultnan << "," << concentration <<","<< defaultnan<< ","<< dosage << "\n";
 
     } // end of loop over all rows in data
     outputFile.close();

@@ -29,6 +29,7 @@ struct CSVDataRow
     int istab; // Istab as integer type
     double wind;
     double mass;
+    int icurve;
 
     double hml;
     double zplume;
@@ -95,10 +96,10 @@ public:
         }
         else if(config.computeMode == 3)
         {
-            io::CSVReader<9, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
-            in.read_header(io::ignore_extra_column, "istab","U","Q_mg","x","y","z", "zplume", "zi", "t");
+            io::CSVReader<10, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
+            in.read_header(io::ignore_extra_column, "istab","U","zi","Q_mg","x","y","z", "zplume", "icurve","t");
             CSVDataRow row;
-            while (in.read_row(row.istab, row.wind, row.mass,row.x, row.y, row.zrcp, row.zplume, row.hml, row.t))
+            while (in.read_row(row.istab, row.wind, row.hml,row.mass,row.x, row.y, row.zrcp, row.zplume, row.icurve, row.t))
             {
                 row.sig_x = std::nan("");
                 row.sig_y = std::nan("");
