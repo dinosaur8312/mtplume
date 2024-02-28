@@ -28,9 +28,19 @@ struct CSVDataRow
     // int iwind; // Iwind as integer type
     int istab; // Istab as integer type
     double wind;
+    double mass;
+
+    double hml;
+    double zplume;
+    double zrcp;
+    double t;
+    double concentration;
+    double dosage;
     // char stab; // Stab as character type
     // std::string how; // How as string type
 };
+
+
 
 class CSVParser
 {
@@ -85,17 +95,16 @@ public:
         }
         else if(config.computeMode == 3)
         {
-            io::CSVReader<6, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
-            in.read_header(io::ignore_extra_column, "iplot", "zrcp", "zplume", "hml","sigz", "zfunc");
+            io::CSVReader<9, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
+            in.read_header(io::ignore_extra_column, "istab","U","Q_mg","x","y","z", "zplume", "zi", "t");
             CSVDataRow row;
-            while (in.read_row(row.istab, row.x, row.y, row.z, row.sig_z, row.wind))
+            while (in.read_row(row.istab, row.wind, row.mass,row.x, row.y, row.zrcp, row.zplume, row.hml, row.t))
             {
                 row.sig_x = std::nan("");
                 row.sig_y = std::nan("");
                 rows.push_back(row);
             }
         }
-
         else
         {
             io::CSVReader<6, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);

@@ -13,6 +13,7 @@ void compareSigmaData(std::vector<CSVDataRow> coefs, const int id0, const int id
                       float &sig_x, float &exp_log_sig_x_coef, float &error_logx,
                       const int sigid);
 void compareZfunction(std::vector<CSVDataRow> data, std::ofstream &outputFile);
+void generateSample(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, std::ofstream &outputFile);
 
 template <int N>
 float zReflections(float zrcp, float zplume, float hml, float sigz)
@@ -99,6 +100,12 @@ public:
 
         // Further processing with config data...
         auto coefs = CSVParser::parseCoefCSV(config.coefCSVPath);
+
+        if(computeMode ==3)
+        {
+            generateSample(data, coefs, outputFile);
+            return;
+        }
 
         // find min and max wind speed and x in coefs table
         double xmin = 9999999.f;
