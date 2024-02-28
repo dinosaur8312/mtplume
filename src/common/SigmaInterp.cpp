@@ -319,6 +319,13 @@ inline double normcdf(double x)
     return 0.5 * (1. + erf(INV_SQRT2 * x));
 }
 
+
+inline double normpdf(double x)
+{
+    static constexpr double INV_SQRT2PI = 0.3989422804014327;
+    return INV_SQRT2PI * exp(-0.5f * x * x);
+}
+
 double centerlineDosage(
     double  x, double  t, double Q, double U, double zFunc, double sigX, double sigY)
 {
@@ -329,6 +336,18 @@ double centerlineDosage(
     static constexpr float INV_ROOT2PI = 0.3989422804014327;
     float coef = INV_ROOT2PI / (sigY * U) * zFunc;
     return Q * coef * normcdf((U * t - x) / sigX) - normcdf(-x / sigX);
+}
+
+double centerlineConcentration(
+    double  x, double  t, double Q, double U, double zFunc, double sigX, double sigY)
+{
+    if (t < 0.f)
+    {
+        return 0.f;
+    }
+    static constexpr float INV_ROOT2PI = 0.3989422804014327;
+    float coef = INV_ROOT2PI / (sigY * sigX) * zFunc;
+    return Q * coef * normpdf((U * t - x) / sigX);
 }
 
 void generateSample(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, std::ofstream &outputFile)
@@ -354,7 +373,7 @@ void generateSample(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs,
             windmax = wind;
     }
 
-    outputFile << "ID,istab,wind,x,y,z,sig_x,sig_y,sig_z, zfunc,dose\n";
+    outputFile << "ID,istab,wind,x,y,z,sig_x,sig_y,sig_z, zfunc,concentration, dose\n";
 
     int pass_count = 0;
     // loop over all rows in data
@@ -390,13 +409,15 @@ void generateSample(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs,
 
         double zfunc = zFunction(row.zrcp, row.zplume, row.hml, row.sig_z);
 
+        double concentration = centerlineConcentration(
+            row.x, row.t, row.mass, row.wind, zfunc, row.sig_x, row.sig_y);
         double dosage = centerlineDosage(
             row.x, row.t, row.mass, row.wind, zfunc, row.sig_x, row.sig_y);
 
         outputFile << i << "," << istab << "," << wind << ",";
         outputFile << row.x << "," << row.y << "," << row.z << ",";
         outputFile << row.sig_x << "," << row.sig_y << "," << row.sig_z << ",";
-        outputFile << zfunc << "," << dosage << "\n";
+        outputFile << zfunc << "," << concentration <<","<< dosage << "\n";
 
     } // end of loop over all rows in data
     outputFile.close();
