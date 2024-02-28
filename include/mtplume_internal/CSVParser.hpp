@@ -83,6 +83,19 @@ public:
                 rows.push_back(row);
             }
         }
+        else if(config.computeMode == 3)
+        {
+            io::CSVReader<6, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
+            in.read_header(io::ignore_extra_column, "iplot", "zrcp", "zplume", "hml","sigz", "zfunc");
+            CSVDataRow row;
+            while (in.read_row(row.istab, row.x, row.y, row.z, row.sig_z, row.wind))
+            {
+                row.sig_x = std::nan("");
+                row.sig_y = std::nan("");
+                rows.push_back(row);
+            }
+        }
+
         else
         {
             io::CSVReader<6, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);

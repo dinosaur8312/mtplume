@@ -40,8 +40,12 @@ SimConfig JsonInputHandler::processJsonFile(const std::string& filePath) {
     // Set computeMode based on filename
     if (config.refCSVPath.find("_02") != std::string::npos) {
         config.computeMode = 1;
-    } else if (config.refCSVPath.find("zFunc") != std::string::npos) {
+    } 
+    else if (config.refCSVPath.find("zFunc") != std::string::npos) {
         config.computeMode = 2;
+    }
+    else if (config.refCSVPath.find("sample") != std::string::npos) {
+        config.computeMode = 3;
     }
     else {
         config.computeMode = 0;
