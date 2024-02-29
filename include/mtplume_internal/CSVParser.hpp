@@ -37,6 +37,9 @@ struct CSVDataRow
     double t;
     double concentration;
     double dosage;
+    double xv;
+    double yv;
+    double zv;
     // char stab; // Stab as character type
     // std::string how; // How as string type
 };
@@ -106,7 +109,17 @@ public:
                 rows.push_back(row);
             }
         }
-        else
+        else if(config.computeMode==4)
+        {
+            io::CSVReader<12, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
+            in.read_header(io::ignore_extra_column, "istab","U","zi","Q_mg","x","sig_x0","sig_y0","sig_z0", "z","zplume", "icurve","t");
+            CSVDataRow row;
+            while (in.read_row(row.istab, row.wind, row.hml,row.mass,row.x, row.sig_x,row.sig_y, row.sig_z, row.zrcp, row.zplume, row.icurve, row.t))
+            {
+                rows.push_back(row);
+            }
+        }
+        else if(config.computeMode ==0)
         {
             io::CSVReader<6, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
             in.read_header(io::ignore_extra_column, "istab", "speed", "x", "sig_x0", "sig_y0", "sig_z0");

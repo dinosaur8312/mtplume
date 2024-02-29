@@ -52,7 +52,11 @@ SimConfig JsonInputHandler::processJsonFile(const std::string& filePath) {
     }
     else if (config.refCSVPath.find("_01") != std::string::npos) 
     {
-        config.computeMode = 1;
+        config.computeMode = 0;
+    }
+    else if (config.refCSVPath.find("source_sigma") != std::string::npos) 
+    {
+        config.computeMode = 4;
     }
     else
     {
