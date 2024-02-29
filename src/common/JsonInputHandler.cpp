@@ -38,17 +38,25 @@ SimConfig JsonInputHandler::processJsonFile(const std::string& filePath) {
     config.refCSVPath = j.value("reference_CSV", "");
     config.outputCSVPath = j.value("outputCSV", "");
     // Set computeMode based on filename
-    if (config.refCSVPath.find("_02") != std::string::npos) {
+    if (config.refCSVPath.find("_02") != std::string::npos) 
+    {
         config.computeMode = 1;
     } 
-    else if (config.refCSVPath.find("zFunc") != std::string::npos) {
+    else if (config.refCSVPath.find("zFunc") != std::string::npos) 
+    {
         config.computeMode = 2;
     }
-    else if (config.refCSVPath.find("sample") != std::string::npos) {
+    else if (config.refCSVPath.find("sample") != std::string::npos)
+    {
         config.computeMode = 3;
     }
-    else {
-        config.computeMode = 0;
+    else if (config.refCSVPath.find("_01") != std::string::npos) 
+    {
+        config.computeMode = 1;
+    }
+    else
+    {
+        config.computeMode = 3;
     }
     //print the path
     std::cout << "input coef CSV: " << config.coefCSVPath << std::endl;
