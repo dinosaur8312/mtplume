@@ -752,15 +752,26 @@ void generateSourceSigma(std::vector<CSVDataRow> data, std::vector<CSVDataRow> c
         bool flag = false;
         findFourCoefs_sig(coefs, istab, wind, x, id0, id1, id2, id3, flag);
 #if (PRTCHECK)
-        printf("xk_flag, compareSigmaData, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
+        printf("xk_flag, compareSigmaData:sigma search, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
 #endif
 
         calcData_virtual(coefs, id0, id1, id2, id3, x, row,0);
+#if (PRTCHECK)
+        printf("xk_flag, compareSigmaData, row.xv = %f\n", row.xv);
+#endif
+        printf("xk_flag, compareSigmaData, row.x+row.xv = %f\n", row.x+row.xv);
+        findFourCoefs(coefs, istab, wind, row.x+row.xv, id0, id1, id2, id3, flag);
+        printf("xk_flag, compareSigmaData: x search: id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", id0, id1, id2, id3);
 
-        findFourCoefs_sig(coefs, istab, wind, y, id0, id1, id2, id3, flag);
-        calcData_virtual(coefs, id0, id1, id2, id3, y, row,1);
-        findFourCoefs_sig(coefs, istab, wind, z, id0, id1, id2, id3, flag);
-        calcData_virtual(coefs, id0, id1, id2, id3, z, row, 2);
+        calcData(coefs, id0, id1, id2, id3, row.x+row.xv, row);
+        printf("xk_flag, compareSigmaData, row.sig_x = %f\n", row.sig_x);
+        printf("xk_flag, compareSigmaData, row.sig_y = %f\n", row.sig_y);
+        printf("xk_flag, compareSigmaData, row.sig_z = %f\n", row.sig_z);
+
+        //findFourCoefs_sig(coefs, istab, wind, y, id0, id1, id2, id3, flag);
+        //calcData_virtual(coefs, id0, id1, id2, id3, y, row,1);
+        //findFourCoefs_sig(coefs, istab, wind, z, id0, id1, id2, id3, flag);
+        //calcData_virtual(coefs, id0, id1, id2, id3, z, row, 2);
 
 
 

@@ -113,7 +113,7 @@ public:
             generateSample(data, coefs, outputFile);
             return;
         }
-        if(computeMode ==3)
+        if(computeMode ==4)
         {
             generateSourceSigma(data, coefs, outputFile);
             return;
