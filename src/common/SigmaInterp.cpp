@@ -962,10 +962,10 @@ void generateSourceSigma(std::vector<CSVDataRow> data, std::vector<CSVDataRow> c
 
         findFourCoefs(coefs, istab, wind, row.yv, id0, id1, id2, id3, flag);
         printf("xk_flag, compareSigmaData: y search: id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", id0, id1, id2, id3);
-        calcSigma(coefs, id0, id1, id2, id3, row.yv, row, 1);
+        calcSigma(coefs, id0, id1, id2, id3, row.yv+row.x, row, 1);
         findFourCoefs(coefs, istab, wind, row.zv, id0, id1, id2, id3, flag);
         printf("xk_flag, compareSigmaData: z search: id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", id0, id1, id2, id3);
-        calcSigma(coefs, id0, id1, id2, id3, row.zv, row, 2);
+        calcSigma(coefs, id0, id1, id2, id3, row.zv+row.x, row, 2);
         printf("xk_flag, compareSigmaData, row.sig_x = %f\n", row.sig_x);
         printf("xk_flag, compareSigmaData, row.sig_y = %f\n", row.sig_y);
         printf("xk_flag, compareSigmaData, row.sig_z = %f\n", row.sig_z);
