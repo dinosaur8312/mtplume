@@ -113,7 +113,7 @@ void findFourCoefs(std::vector<CSVDataRow> coefs, const int istab, const float w
 }
 
 void findFourCoefs_sig(std::vector<CSVDataRow> coefs, const int istab, const float wind, const float x,
-                   int &id0, int &id1, int &id2, int &id3, bool &flag)
+                   int &id0, int &id1, int &id2, int &id3, bool &flag, const int sigid)
 {
     id0 = -1;
     id1 = -1;
@@ -124,6 +124,8 @@ void findFourCoefs_sig(std::vector<CSVDataRow> coefs, const int istab, const flo
     std::vector<std::vector<double>> windgap_min(2, std::vector<double>(2, 9999999.f));
     std::vector<std::vector<double>> xgap_min(2, std::vector<double>(2, 9999999.f));
 
+    int jminwind=-1;
+    int jmaxwind=-1;
     for (int j = 0; j < coefs.size(); j++)
     {
         auto row_coef = coefs[j];
@@ -132,41 +134,118 @@ void findFourCoefs_sig(std::vector<CSVDataRow> coefs, const int istab, const flo
             continue;
 
         double wind_coef = row_coef.wind;
-        double x_coef = row_coef.sig_x;
+
+        double x_coef;
+        if(sigid==0)
+            x_coef = row_coef.sig_x;
+        else if(sigid==1)
+            x_coef = row_coef.sig_y;
+        else if(sigid==2)
+            x_coef = row_coef.sig_z;
+
+        double windgap = abs(wind_coef - wind);
+        if (wind_coef <= wind)
+        {
+            if (windgap < windgap_min[0][0])
+            {
+                jminwind=j;
+                windgap_min[0][0]=windgap;
+            }
+        }
+        else
+        {
+            if (windgap <= windgap_min[0][1])
+            {
+                jmaxwind=j;
+                windgap_min[0][1]=windgap;
+            }
+
+        }
+
+    }
+    printf("jminwind=%d\n",jminwind);
+    printf("jmaxwind=%d\n",jmaxwind);
+
+    for (int j = jminwind; j < jmaxwind; j++)
+    {
+        auto row_coef = coefs[j];
+        int istab_coef = row_coef.istab;
+        if (istab_coef != istab)
+            continue;
+
+        double wind_coef = row_coef.wind;
+
+        double x_coef;
+        if(sigid==0)
+            x_coef = row_coef.sig_x;
+        else if(sigid==1)
+            x_coef = row_coef.sig_y;
+        else if(sigid==2)
+            x_coef = row_coef.sig_z;
 
         double windgap = abs(wind_coef - wind);
         double xgap = abs(x_coef - x);
 
+        if((sigid==2)&&(j>168)&&(j<172))
+        {
+        printf("\nj=%d\n",j);
+        printf("x=%f\n",x);
+
+        printf("wind_coef=%f\n",wind_coef);
+        printf("x_coef=%f\n",x_coef);
+        printf("windgap=%f\n",windgap);
+        printf("xgap=%f\n",xgap);
+        }
+
         if (wind_coef <= wind)
         {
+            if((sigid==2)&&(j>168)&&(j<172))
+            {
+                printf("flag wind0\n");
+            }
             if (windgap <= (windgap_min[0][0] + EPSILON))
             {
+                if((sigid==2)&&(j>168)&&(j<172))
+                {
+                    printf("thresh wind0\n");
+                }
                 if (x_coef <= x)
                 {
-                    if (xgap <= xgap_min[0][0])
+                    if (xgap <= (xgap_min[0][0]+EPSILON))
                     {
                         xgap_min[0][0] = xgap;
                         windgap_min[0][0] = windgap;
                         id0 = j;
+                    //    printf("XXXXXXXXX FOUND id0\n");
                     }
                 }
             }
 
             if (windgap <= (windgap_min[0][1] + EPSILON))
             {
+                if((sigid==2)&&(j>168)&&(j<172))
+                {
+                    printf("thresh wind1\n");
+                }
                 if (x_coef > x)
                 {
-                    if (xgap <= xgap_min[0][1])
+                    if (xgap <= (xgap_min[0][1] + EPSILON))
                     {
                         xgap_min[0][1] = xgap;
                         windgap_min[0][1] = windgap;
                         id1 = j;
+                        //printf("XXXXXXXXX FOUND id1\n");
+                        //printf("xgap_min01=%f,windgap_min01=%f,id1=%d\n",xgap,windgap,j);
                     }
                 }
             }
         }
         else
         {
+            if((sigid==2)&&(j>168)&&(j<172))
+            {
+                printf("flag wind1\n");
+            }
             if (windgap <= (windgap_min[1][0] + EPSILON))
             {
 
@@ -195,8 +274,8 @@ void findFourCoefs_sig(std::vector<CSVDataRow> coefs, const int istab, const flo
             }
         }
 
-        if ((id1 >= 0) && (id2 >= 0) && (id3 >= 0) && (id0 >= 0))
-            break;
+       // if ((id1 >= 0) && (id2 >= 0) && (id3 >= 0) && (id0 >= 0))
+         //   break;
 
     } // end of loop over all rows in coefs to find id0, id1, id2, id3
 
@@ -220,6 +299,9 @@ void findFourCoefs_sig(std::vector<CSVDataRow> coefs, const int istab, const flo
         id1 = id3;
         id0 = id2;
     }
+
+    if(id1<id0) id1=id0+1;
+    if(id3<id2) id3=id2+1;
 }
 
 void compareSigmaData(std::vector<CSVDataRow> coefs, const int id0, const int id1, const int id2, const int id3,
@@ -506,6 +588,88 @@ void calcData(std::vector<CSVDataRow> coefs, const int id0, const int id1, const
     log_sig_x_coef = (1.f - w_wind) * log_sig_x01 + w_wind * log_sig_x23;
     row.sig_z = exp(log_sig_x_coef);
 }
+
+void calcSigma(std::vector<CSVDataRow> coefs, const int id0, const int id1, const int id2, const int id3, double x,
+              CSVDataRow &row, const int comp)
+{
+    auto row0 = coefs[id0];
+    auto row1 = coefs[id1];
+    auto row2 = coefs[id2];
+    auto row3 = coefs[id3];
+
+    double x0, x1, x2, x3;
+    x0 = row0.x;
+    x1 = row1.x;
+    x2 = row2.x;
+    x3 = row3.x;
+    double logx0 = log(x0);
+    double logx1 = log(x1);
+    double logx2 = log(x2);
+    double logx3 = log(x3);
+
+    double logx = log(x);
+
+    double wx01 = id0 == id1 ? 0.f : (logx - logx0) / (logx1 - logx0);
+    double wx23 = id2 == id3 ? 0.f : (logx - logx2) / (logx3 - logx2);
+
+    printf("x0=%f,x1=%f,x2=%f,x3=%f\n",x0,x1,x2,x3);
+    printf("wx01=%f\n",wx01);
+    printf("wx23=%f\n",wx23);
+
+    double w_wind = id0 == id2 ? 0.f : (row.wind - row0.wind) / (row2.wind - row0.wind);
+
+    double sig_x0, sig_x1, sig_x2, sig_x3;
+    double log_sig_x0, log_sig_x1, log_sig_x2, log_sig_x3;
+    double log_sig_x01, log_sig_x23;
+    double log_sig_x_coef;
+
+    if(comp==0)
+    {
+    sig_x0 = row0.sig_x;
+    sig_x1 = row1.sig_x;
+    sig_x2 = row2.sig_x;
+    sig_x3 = row3.sig_x;
+    }
+    else if(comp==1)
+    {
+    sig_x0 = row0.sig_y;
+    sig_x1 = row1.sig_y;
+    sig_x2 = row2.sig_y;
+    sig_x3 = row3.sig_y;
+    printf("sx0=%f,sx1=%f,sx2=%f,sx3=%f\n",sig_x0,sig_x1,sig_x2,sig_x3);
+    }
+    else if(comp==2)
+    {
+    sig_x0 = row0.sig_z;
+    sig_x1 = row1.sig_z;
+    sig_x2 = row2.sig_z;
+    sig_x3 = row3.sig_z;
+    }
+
+
+    log_sig_x0 = log(sig_x0);
+    log_sig_x1 = log(sig_x1);
+    log_sig_x2 = log(sig_x2);
+    log_sig_x3 = log(sig_x3);
+
+    log_sig_x01 = (1.f - wx01) * log_sig_x0 + wx01 * log_sig_x1;
+    log_sig_x23 = (1.f - wx23) * log_sig_x2 + wx23 * log_sig_x3;
+    printf("log_sig_x0=%f, log_sig_x1=%f,log_sig_x2=%f,log_sig_x3=%f\n", log_sig_x0,log_sig_x1,log_sig_x2,log_sig_x3);
+    printf("log_sig_x01=%f, log_sig_x23=%f\n", log_sig_x01,log_sig_x23);
+
+
+    log_sig_x_coef = (1.f - w_wind) * log_sig_x01 + w_wind * log_sig_x23;
+    if(comp==0)
+    row.sig_x = exp(log_sig_x_coef);
+    if (comp==1)
+    {
+    row.sig_y = exp(log_sig_x_coef);
+    printf("sig_y=%f\n",row.sig_y);
+    }
+    if (comp==2)
+    row.sig_z = exp(log_sig_x_coef);
+
+}
 void calcData_virtual(std::vector<CSVDataRow> coefs, const int id0, const int id1, const int id2, const int id3, double x,
               CSVDataRow &row, const int xid)
 {
@@ -515,10 +679,27 @@ void calcData_virtual(std::vector<CSVDataRow> coefs, const int id0, const int id
     auto row3 = coefs[id3];
 
     double x0, x1, x2, x3;
+    if(xid==0)
+    {
     x0 = row0.sig_x;
     x1 = row1.sig_x;
     x2 = row2.sig_x;
     x3 = row3.sig_x;
+    }
+    if(xid==1)
+    {
+    x0 = row0.sig_y;
+    x1 = row1.sig_y;
+    x2 = row2.sig_y;
+    x3 = row3.sig_y;
+    }
+    if(xid==2)
+    {
+    x0 = row0.sig_z;
+    x1 = row1.sig_z;
+    x2 = row2.sig_z;
+    x3 = row3.sig_z;
+    }
     double logx0 = log(x0);
     double logx1 = log(x1);
     double logx2 = log(x2);
@@ -723,7 +904,8 @@ void generateSourceSigma(std::vector<CSVDataRow> data, std::vector<CSVDataRow> c
     {
         auto row = data[i];
         double x = row.sig_x;
-        double y, z;
+        double y = row.sig_y;
+        double z = row.sig_z;
         int istab = row.istab;
         double wind = row.wind;
 
@@ -745,25 +927,45 @@ void generateSourceSigma(std::vector<CSVDataRow> data, std::vector<CSVDataRow> c
             z = zmin;
         if (z > zmax)
             z = zmax;
+        printf("clip sig_x = %f\n",x);
+        printf("clip sig_y = %f\n",y);
+        printf("clip sig_z = %f\n",z);
         // double logx = log(x);
         // double logy, logz;
 
         int id0, id1, id2, id3;
         bool flag = false;
-        findFourCoefs_sig(coefs, istab, wind, x, id0, id1, id2, id3, flag);
+        findFourCoefs_sig(coefs, istab, wind, x, id0, id1, id2, id3, flag, 0);
 #if (PRTCHECK)
-        printf("xk_flag, compareSigmaData:sigma search, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
+        printf("xk_flag, compareSigmaData:sigmax search, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
 #endif
 
         calcData_virtual(coefs, id0, id1, id2, id3, x, row,0);
-#if (PRTCHECK)
         printf("xk_flag, compareSigmaData, row.xv = %f\n", row.xv);
+
+        findFourCoefs_sig(coefs, istab, wind, y, id0, id1, id2, id3, flag, 1);
+        printf("xk_flag, compareSigmaData:sigmay search, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
+        calcData_virtual(coefs, id0, id1, id2, id3, y, row,1);
+        printf("xk_flag, compareSigmaData, row.yv = %f\n", row.yv);
+
+        findFourCoefs_sig(coefs, istab, wind, z, id0, id1, id2, id3, flag, 2);
+        printf("xk_flag, compareSigmaData:sigmaz search, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
+        calcData_virtual(coefs, id0, id1, id2, id3, z, row,2);
+#if (PRTCHECK)
+        printf("xk_flag, compareSigmaData, row.zv = %f\n", row.zv);
 #endif
         printf("xk_flag, compareSigmaData, row.x+row.xv = %f\n", row.x+row.xv);
         findFourCoefs(coefs, istab, wind, row.x+row.xv, id0, id1, id2, id3, flag);
         printf("xk_flag, compareSigmaData: x search: id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", id0, id1, id2, id3);
+        calcSigma(coefs, id0, id1, id2, id3, row.x+row.xv, row, 0);
 
-        calcData(coefs, id0, id1, id2, id3, row.x+row.xv, row);
+
+        findFourCoefs(coefs, istab, wind, row.yv, id0, id1, id2, id3, flag);
+        printf("xk_flag, compareSigmaData: y search: id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", id0, id1, id2, id3);
+        calcSigma(coefs, id0, id1, id2, id3, row.yv, row, 1);
+        findFourCoefs(coefs, istab, wind, row.zv, id0, id1, id2, id3, flag);
+        printf("xk_flag, compareSigmaData: z search: id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", id0, id1, id2, id3);
+        calcSigma(coefs, id0, id1, id2, id3, row.zv, row, 2);
         printf("xk_flag, compareSigmaData, row.sig_x = %f\n", row.sig_x);
         printf("xk_flag, compareSigmaData, row.sig_y = %f\n", row.sig_y);
         printf("xk_flag, compareSigmaData, row.sig_z = %f\n", row.sig_z);
@@ -773,9 +975,11 @@ void generateSourceSigma(std::vector<CSVDataRow> data, std::vector<CSVDataRow> c
         //findFourCoefs_sig(coefs, istab, wind, z, id0, id1, id2, id3, flag);
         //calcData_virtual(coefs, id0, id1, id2, id3, z, row, 2);
 
+        printf("zrcp=%f,zplume=%f,hml=%f\n",row.zrcp,row.zplume,row.hml);
 
 
         double zfunc = zFunction(row.zrcp, row.zplume, row.hml, row.sig_z);
+        printf("xk_flag, compareSigmaData, zfunc = %f\n", zfunc);
 
         double concentration = centerlineConcentration(
             (row.x+row.xv), row.t, row.mass, row.wind, zfunc, row.sig_x, row.sig_y);

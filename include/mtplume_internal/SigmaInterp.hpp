@@ -9,7 +9,7 @@
 void findFourCoefs(std::vector<CSVDataRow> coefs, const int istab, const float wind, const float x,
                    int &id0, int &id1, int &id2, int &id3, bool &flag);
 void findFourCoefs_sig(std::vector<CSVDataRow> coefs, const int istab, const float wind, const float sig_x,
-                   int &id0, int &id1, int &id2, int &id3, bool &flag);
+                   int &id0, int &id1, int &id2, int &id3, bool &flag,const int sigid);
 void compareSigmaData(std::vector<CSVDataRow> coefs, const int id0, const int id1, const int id2, const int id3,
                       const float x, CSVDataRow row,
                       float &sig_x, float &exp_log_sig_x_coef, float &error_logx,
@@ -214,7 +214,7 @@ public:
             float sig_x_cal, sig_y_cal, sig_z_cal;
             float err_x, err_y, err_z;
             //findFourCoefs(coefs, istab, wind, x, id0, id1, id2, id3, flag);
-            findFourCoefs_sig(coefs, istab, wind, sig_x, id0, id1, id2, id3, flag);
+            findFourCoefs_sig(coefs, istab, wind, sig_x, id0, id1, id2, id3, flag,0);
 
 #if (PRTCHECK)
             printf("xk_flag, compareSigmaData, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
