@@ -1,5 +1,61 @@
 {
-    "coefs_CSV": "../tests/unit_tests/hpac_dispersion_coefs.csv",
-    "reference_CSV": "../tests/unit_tests/test_virtual_sources_01.csv",
-    "outputCSV": "output_data.csv"
+    "reference": "../tests/unit_tests/hpac_dispersion_coefs.csv",
+    "output": "output_data.csv",
+    "input": {
+        "filePath": "../tests/unit_tests/dose_v_dist_in.csv",
+        "parameters": {
+            "stability": {
+                "required": true,
+                "columnName": "istab"
+            },
+            "windSpeed": {
+                "required": true,
+                "columnName": "U"
+            },
+            "hml": {
+                "required": true,
+                "columnName": "hml"
+            },
+            "Q": {
+                "required": true,
+                "columnName": "Q_mg"
+            },
+            "srcX": {
+                "required": false,
+                "columnName": "xv"
+            },
+            "srcY": {
+                "required": false,
+                "columnName": "yv"
+            },
+            "srcZ": {
+                "required": false,
+                "columnName": "zv"
+            },
+            "recX": {
+                "required": true,
+                "columnName": "x"
+            },
+            "recY": {
+                "required": false,
+                "columnName": ""
+            },
+            "recZ": {
+                "required": true,
+                "columnName": "z"
+            },
+            "sigX": {
+                "required": true,
+                "columnName": "sig_x"
+            },
+            "sigY": {
+                "required": false,
+                "columnName": "sigY"
+            },
+            "sigZ": {
+                "required": true,
+                "columnName": "sigZ"
+            }
+        }
+    }
 }

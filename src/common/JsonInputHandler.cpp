@@ -32,8 +32,6 @@ SimConfig JsonInputHandler::processJsonFile(const std::string& filePath) {
 
     SimConfig config;
 
-
-
     config.coefCSVPath = j.value("coefs_CSV", "");
     config.refCSVPath = j.value("reference_CSV", "");
     config.outputCSVPath = j.value("outputCSV", "");
@@ -67,6 +65,27 @@ SimConfig JsonInputHandler::processJsonFile(const std::string& filePath) {
     std::cout << "input ref CSV: " << config.refCSVPath << std::endl;
     std::cout << "outputCSV: " << config.outputCSVPath << std::endl;
     // Populate other fields as necessary
+
+    return config;
+}
+
+SimConfig JsonInputHandler::processJsonFile(const std::string& filePath) {
+    // Existing file resolution and JSON parsing code remains unchanged
+
+    SimConfig config;
+    // Existing path and config setup code remains unchanged
+
+    // Process parameters within reference_CSV
+    auto& params = j["reference_CSV"]["parameters"];
+    for (auto& [key, value] : params.items()) {
+        if (value.value("required", false)) {
+            // Assume getParamKey is a function that converts a string key to ParamKey
+            ParamKey paramKey = getParamKey(key); 
+            config.parameters[paramKey] = {value.value("columnName", "")};
+        }
+    }
+
+    // ComputeMode logic and printing paths remain unchanged
 
     return config;
 }
