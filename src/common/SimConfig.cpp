@@ -1,15 +1,33 @@
 #include "SimConfig.hpp"
+#include "csv.h"
 #include <fstream>
 #include <nlohmann/json.hpp>
 
+
+
+// Utility function to count lines in a file
+size_t countLinesInFile(const std::string& filePath) {
+    std::ifstream file(filePath);
+    return std::count(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>(), '\n');
+}
+
+
 // SimConfig constructor implementation
-SimConfig::SimConfig(const std::string& filePath) {
-    *this = processJsonFile(filePath); // Populate this instance via processJsonFile
+SimConfig::SimConfig(const std::string& filePath) 
+{
+    this->header_exist = new int[MAX_PARAM_NUM];
+    this->data_ptr = new void*[MAX_PARAM_NUM];
+    for(int i=0;i<MAX_PARAM_NUM;i++)
+    {
+        this->header_exist[i]=0;
+        this->data_ptr[i] = nullptr;
+    }
+
+    processJsonFile(filePath); // Populate this instance via processJsonFile
 }
 
 // Implementation of processJsonFile
-SimConfig SimConfig::processJsonFile(const std::string& filePath) {
-    SimConfig config;
+void SimConfig::processJsonFile(const std::string& filePath) {
 
     std::ifstream file(filePath);
     if (!file.is_open()) {
@@ -20,41 +38,31 @@ SimConfig SimConfig::processJsonFile(const std::string& filePath) {
     file >> j;
     file.close();
 
-    config.coefPath = j.value("reference", "");
-    config.outputPath = j.value("output", "");
+    this->coefPath = j["reference"];
+    this->outputPath = j["output"];
+    this->inputPath = j["input"]["filePath"];
 
-    auto& input = j["input"];
-    config.inputPath = input.value("filePath", "");
+    auto& input_headers = j["input"]["headers"];
 
-    auto& params = input["parameters"];
-    for (auto& [key, value] : params.items()) {
-        if (value.value("required", true)) {
-            ParamKey paramKey = getParamKey(key); // Make sure to implement getParamKey
-            config.parameters[paramKey] = value.value("columnName", "");
+    // Count lines in CSV to determine array sizes
+    size_t caseNum = countLinesInFile(this->inputPath);
+
+
+    int header_num=0;
+    for (auto& [key, value] : input_headers.items()) {
+        if (value=="on") {
+            auto found = headerMap.find(key);
+            if(found!=headerMap.end())
+            {
+                this->header_exist[found->second]=1;
+                this->data_ptr[found->second] = malloc(sizeof(float)*caseNum);
+                header_num++;
+            }
         }
     }
 
-    // ComputeMode logic (as previously defined)
-    // ...
 
-    return config;
+    return;
 }
 
-ParamKey getParamKey(const std::string& key) {
-    if (key == "stability") return ParamKey::Stability;
-    else if (key == "windSpeed") return ParamKey::WindSpeed;
-    else if (key == "hml") return ParamKey::Hml;
-    else if (key == "Q") return ParamKey::Q;
-    else if (key == "srcX") return ParamKey::SrcX;
-    else if (key == "srcY") return ParamKey::SrcY;
-    else if (key == "srcZ") return ParamKey::SrcZ;
-    else if (key == "recX") return ParamKey::RecX;
-    else if (key == "recY") return ParamKey::RecY;
-    else if (key == "recZ") return ParamKey::RecZ;
-    else if (key == "sigX") return ParamKey::SigX;
-    else if (key == "sigY") return ParamKey::SigY;
-    else if (key == "sigZ") return ParamKey::SigZ;
-    // Default case or throw an exception if the key is unrecognized
-    throw std::invalid_argument("Unrecognized parameter key: " + key);
-}
 

@@ -1,47 +1,65 @@
 #pragma once
 
 #include <string>
+#include <fstream>
 #include <unordered_map>
 #include <nlohmann/json.hpp> // Include this for JSON processing
 
-// Define an enum class for parameter keys
-enum class ParamKey {
-    Stability,
-    WindSpeed,
-    Hml,
-    Q,
-    SrcX,
-    SrcY,
-    SrcZ,
-    RecX,
-    RecY,
-    RecZ,
-    SigX,
-    SigY,
-    SigZ
-    // Add other parameters as needed
+#define MAX_PARAM_NUM 32
+enum ParamKeyID
+{
+    STABILITY_ID = 0,
+    WINDSPEED_ID,
+    HML_ID,
+    Q_ID,
+    SRCX_ID,
+    SRCY_ID,
+    SRCZ_ID,
+    RECX_ID,
+    RECY_ID,
+    RECZ_ID,
+    SIGX_ID,
+    SIGY_ID,
+    SIGZ_ID,
+    ZFUNC_ID,
+    CONCENTRATION_ID,
+    DOSAGE_ID
+    // Add other parameters as needed, they will automatically be assigned the next integer values.
 };
 
-// Simplify ParameterConfig to only store column names
-struct ParameterConfig {
-    std::string columnName;
-};
-
-class SimConfig {
+class SimConfig
+{
 public:
     std::string coefPath;
     std::string inputPath;
     std::string outputPath;
-    std::unordered_map<ParamKey, std::string> parameters; // Store just column names
-    int computeMode;
+
+    void **data_ptr;
+    int *header_exist;
 
     // Constructor that takes a file path
-    explicit SimConfig(const std::string& filePath);
-
-    // Static member function for processing a JSON file into a SimConfig object
-    static SimConfig processJsonFile(const std::string& filePath);
+    SimConfig(const std::string &filePath);
+    ~SimConfig();
 
 private:
-    // Helper function for mapping strings to ParamKey
-    static ParamKey getParamKey(const std::string& key);
+    void processJsonFile(const std::string &filePath);
+
+    std::unordered_map<std::string, ParamKeyID> headerMap = {
+        {"stability", STABILITY_ID},
+        {"windSpeed", WINDSPEED_ID},
+        {"hml", HML_ID},
+        {"Q", Q_ID},
+        {"srcX", SRCX_ID},
+        {"srcY", SRCY_ID},
+        {"srcZ", SRCZ_ID},
+        {"recX", RECX_ID},
+        {"recY", RECY_ID},
+        {"recZ", RECZ_ID},
+        {"sigX", SIGX_ID},
+        {"sigY", SIGY_ID},
+        {"sigZ", SIGZ_ID},
+        {"zfunc", ZFUNC_ID},
+        {"concentration", CONCENTRATION_ID},
+        {"dosage", DOSAGE_ID},
+    }
 };
