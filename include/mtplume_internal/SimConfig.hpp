@@ -2,7 +2,6 @@
 
 #include <string>
 #include <fstream>
-#include <unordered_map>
 #include <nlohmann/json.hpp> // Include this for JSON processing
 
 template<typename T>
@@ -42,3 +41,6 @@ private:
     void processJsonFile(const std::string &filePath);
 
 };
+
+template class SimConfig<double>; // For example, instantiate for double
+template class SimConfig<float>; // For example, instantiate for double

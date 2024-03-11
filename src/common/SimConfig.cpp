@@ -11,28 +11,29 @@ size_t countLinesInFile(const std::string &filePath)
 }
 
 // SimConfig constructor implementation
-template<typename T>
-SimConfig::SimConfig(const std::string &filePath) : coefPath(""), inputPath(""), outputPath(""), sourceSigma(false),
-                                                    istab(nullptr), wind(nullptr), hml(nullptr), x(nullptr), y(nullptr), z(nullptr),
-                                                    xv(nullptr), yv(nullptr), zv(nullptr), sig_x(nullptr), sig_y(nullptr), sig_z(nullptr),
-                                                    mass(nullptr), zplume(nullptr), zrcp(nullptr), t(nullptr), concentration(nullptr), dosage(nullptr)
+template <typename T>
+SimConfig<T>::SimConfig(const std::string &filePath) : coefPath(""), inputPath(""), outputPath(""), sourceSigma(false),
+                                                       istab(nullptr), wind(nullptr), hml(nullptr), x(nullptr), y(nullptr), z(nullptr),
+                                                       xv(nullptr), yv(nullptr), zv(nullptr), sig_x(nullptr), sig_y(nullptr), sig_z(nullptr),
+                                                       mass(nullptr), zplume(nullptr), zrcp(nullptr), t(nullptr), concentration(nullptr), dosage(nullptr)
 {
     processJsonFile(filePath); // Populate this instance via processJsonFile
+    parseRef(coefPath);        // Parse the CSV file
 }
 
-template<typename T>
+template <typename T>
 SimConfig<T>::~SimConfig()
 {
     // Clean up dynamically allocated memory if you allocate any in your class
     // For example:
     delete[] istab; // Only if istab is dynamically allocated
-    delete[] wind; // Assume dynamic array, so use delete[]
+    delete[] wind;  // Assume dynamic array, so use delete[]
     // Repeat for other dynamically allocated members...
 }
 
 // Implementation of processJsonFile
-template<typename T>
-void SimConfig::processJsonFile(const std::string &filePath)
+template <typename T>
+void SimConfig<T>::processJsonFile(const std::string &filePath)
 {
 
     std::ifstream file(filePath);
@@ -58,3 +59,5 @@ void SimConfig::processJsonFile(const std::string &filePath)
 
     return;
 }
+
+// Implementation of parseRef
