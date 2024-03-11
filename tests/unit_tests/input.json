@@ -1,22 +1,12 @@
 {
-    "reference": "../tests/unit_tests/hpac_dispersion_coefs.csv",
-    "output": "output_data.csv",
-    "input": {
-        "filePath": "../tests/unit_tests/dose_v_dist_in.csv",
-        "headers": {
-            "stability": "on",
-            "windSpeed": "on",
-            "hml": "on",
-            "Q": "on",
-            "srcX": "off",
-            "srcY": "off",
-            "srcZ": "off",
-            "recX": "on",
-            "recY": "off",
-            "recZ": "off",
-            "sigX": "on",
-            "sigY": "on",
-            "SigZ": "on"
-        }
+    "Reference": {
+        "File": "../tests/unit_tests/hpac_dispersion_coefs.csv"
+    },
+    "Output": {
+        "File": "output_data.csv"
+    },
+    "Input": {
+        "File": "../tests/unit_tests/dose_v_dist_in.csv",
+        "SourceSigma": "on"
     }
 }

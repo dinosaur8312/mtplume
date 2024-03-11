@@ -3,34 +3,41 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 
-
-
 // Utility function to count lines in a file
-size_t countLinesInFile(const std::string& filePath) {
+size_t countLinesInFile(const std::string &filePath)
+{
     std::ifstream file(filePath);
     return std::count(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>(), '\n');
 }
 
-
 // SimConfig constructor implementation
-SimConfig::SimConfig(const std::string& filePath) 
+template<typename T>
+SimConfig::SimConfig(const std::string &filePath) : coefPath(""), inputPath(""), outputPath(""), sourceSigma(false),
+                                                    istab(nullptr), wind(nullptr), hml(nullptr), x(nullptr), y(nullptr), z(nullptr),
+                                                    xv(nullptr), yv(nullptr), zv(nullptr), sig_x(nullptr), sig_y(nullptr), sig_z(nullptr),
+                                                    mass(nullptr), zplume(nullptr), zrcp(nullptr), t(nullptr), concentration(nullptr), dosage(nullptr)
 {
-    this->header_exist = new int[MAX_PARAM_NUM];
-    this->data_ptr = new void*[MAX_PARAM_NUM];
-    for(int i=0;i<MAX_PARAM_NUM;i++)
-    {
-        this->header_exist[i]=0;
-        this->data_ptr[i] = nullptr;
-    }
-
     processJsonFile(filePath); // Populate this instance via processJsonFile
 }
 
+template<typename T>
+SimConfig<T>::~SimConfig()
+{
+    // Clean up dynamically allocated memory if you allocate any in your class
+    // For example:
+    delete[] istab; // Only if istab is dynamically allocated
+    delete[] wind; // Assume dynamic array, so use delete[]
+    // Repeat for other dynamically allocated members...
+}
+
 // Implementation of processJsonFile
-void SimConfig::processJsonFile(const std::string& filePath) {
+template<typename T>
+void SimConfig::processJsonFile(const std::string &filePath)
+{
 
     std::ifstream file(filePath);
-    if (!file.is_open()) {
+    if (!file.is_open())
+    {
         throw std::runtime_error("Could not open JSON input file: " + filePath);
     }
 
@@ -38,31 +45,16 @@ void SimConfig::processJsonFile(const std::string& filePath) {
     file >> j;
     file.close();
 
-    this->coefPath = j["reference"];
-    this->outputPath = j["output"];
-    this->inputPath = j["input"]["filePath"];
+    this->coefPath = j["Reference"]["File"];
+    this->outputPath = j["Output"]["File"];
+    this->inputPath = j["Input"]["File"];
 
-    auto& input_headers = j["input"]["headers"];
-
-    // Count lines in CSV to determine array sizes
-    size_t caseNum = countLinesInFile(this->inputPath);
-
-
-    int header_num=0;
-    for (auto& [key, value] : input_headers.items()) {
-        if (value=="on") {
-            auto found = headerMap.find(key);
-            if(found!=headerMap.end())
-            {
-                this->header_exist[found->second]=1;
-                this->data_ptr[found->second] = malloc(sizeof(float)*caseNum);
-                header_num++;
-            }
-        }
-    }
-
+    // Check if "SourceSigma" key exists and is set to "on"
+    auto it = j["Input"].find("SourceSigma");
+    if (it != j["Input"].end() && it.value() == "on")
+        this->sourceSigma = true;
+    else
+        this->sourceSigma = false;
 
     return;
 }
-
-
