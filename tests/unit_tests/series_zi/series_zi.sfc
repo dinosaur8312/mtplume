@@ -1,0 +1,14 @@
+# CREATOR:       Weather File Editor Version 1.17 (IEM61081/192.168.56.1)
+# DATE:          2024-03-10 23:59
+# SOURCE:        OBS
+# EDITED:        YES
+# REFERENCE:     AGL
+# TYPE:          OBSERVATION
+# TIMEREFERENCE: UTC
+# MODE:          OBS ALL
+SURFACE
+12
+ID      YYYYMMDDHOUR    LAT     LON     ZI      Z       WDIR    WSPD    T       H       PGT     
+                HOURS   N       E       M       M       DEG     M/S     C       %               
+-9999
+0000000 20230825 5.0    32.5    -111.5  100.0   10      270     5.0     15.0    50      4       

@@ -23,17 +23,18 @@ void compareZfunction(std::vector<CSVDataRow> data, std::ofstream &outputFile);
 void generateSample(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, std::ofstream &outputFile);
 void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, std::ofstream &outputFile);
 void generateSourceSigma(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, std::ofstream &outputFile);
+void generateComplete(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, std::ofstream &outputFile);
 
 template <int N>
-float zReflections(float zrcp, float zplume, float hml, float sigz)
+double zReflections(double zrcp, double zplume, double hml, double sigz)
 {
-    float arg = (zrcp - zplume) / sigz;
-    if (fabs(arg) > 4.f)
+    double arg = (zrcp - zplume) / sigz;
+    if (abs(arg) > 4.)
         return 0.f;
-    float zf = exp(-0.5f * arg * arg);
+    double zf = exp(-0.5 * arg * arg);
     if constexpr (N < 5)
     {
-        if (0.0f < zplume)
+        if (0.0 < zplume)
             zf += zReflections<N + 1>(zrcp, -zplume, hml, sigz);
         if (zplume < hml)
             zf += zReflections<N + 1>(zrcp, 2.0f * hml - zplume, hml, sigz);
@@ -45,24 +46,24 @@ float zReflections(float zrcp, float zplume, float hml, float sigz)
     return zf;
 }
 
-inline float zFunction(float zrcp, float zplume, float hml, float sigz)
+inline double zFunction(double zrcp, double zplume, double hml, double sigz)
 {
     if((hml < zrcp)&&(zplume<=hml))
-        return 0.f;
+        return 0.;
 
 
-    static constexpr float INV_ROOT2PI = 0.3989422804014327;
-    float zrefl = 0.f;
+    static constexpr double INV_ROOT2PI = 0.3989422804014327;
+    float zrefl = 0.;
     if(zplume<=hml)
     {
         if(zrcp>hml)
-            return 0.f;
+            return 0.;
         if(sigz>hml)
-            return 1.f / hml;
+            return 1. / hml;
         zplume = zplume < 1.0e-3 ? 1.0e-3 : zplume;
 
         if(zplume<=hml)
-            zplume = (hml-0.001f)<zplume?hml-0.001f:zplume;
+            zplume = (hml-0.001)<zplume?hml-0.001:zplume;
 
         zrefl = zReflections<0>(zrcp, zplume, hml, sigz);
         
@@ -70,41 +71,41 @@ inline float zFunction(float zrcp, float zplume, float hml, float sigz)
     else
     {
         if(zrcp<=hml)
-            return 0.f;
+            return 0.;
         float arg = (zrcp - zplume) / sigz;
 
-        zrefl = exp(-0.5f * arg * arg);
+        zrefl = exp(-0.5 * arg * arg);
 
-        arg = (zrcp +2.0f * hml - zplume) / sigz;
-        zrefl += exp(-0.5f * arg * arg);
+        arg = (zrcp +2.0 * hml - zplume) / sigz;
+        zrefl += exp(-0.5 * arg * arg);
     }
 
 
     return INV_ROOT2PI / sigz * zrefl;
 }
 
-inline float gaussFunction( float x)
+inline double gaussFunction( double x)
 {
 
-    return  exp(-0.5f * x * x) ;
+    return  exp(-0.5 * x * x) ;
 }
-inline float pdfFunction( float y,float sigy = 1.f)
+inline double pdfFunction( double y,double sigy = 1.)
 {
     static constexpr float INV_ROOT2PI = 0.3989422804014327;
     float arg = y / sigy;
 
-    return INV_ROOT2PI* exp(-0.5f * arg * arg) /sigy;
+    return INV_ROOT2PI* exp(-0.5 * arg * arg) /sigy;
 }
 
-inline float cdfFunction(float x, float scale = 1.f)
+inline double cdfFunction(double x, double scale = 1.)
 {
-    static constexpr float INV_SQRT2 = 0.7071067811865475;
-    return 0.5f * (1.f + erf(INV_SQRT2 * (x/scale)));
+    static constexpr double INV_SQRT2 = 0.7071067811865475;
+    return 0.5 * (1. + erf(INV_SQRT2 * (x/scale)));
 }
 
-inline float IcdfFunction(float x, float scale = 1.f)
+inline double IcdfFunction(double x, double scale = 1.f)
 {
-    float xs = x/scale;
+    double xs = x/scale;
 
     return xs*cdfFunction(x, scale)+pdfFunction(x/scale);
 }
@@ -148,6 +149,11 @@ public:
         if(computeMode ==5)
         {
             generateDose(data, coefs, outputFile);
+            return;
+        }
+        if(computeMode ==6)
+        {
+            generateComplete(data, coefs, outputFile);
             return;
         }
 

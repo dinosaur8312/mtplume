@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.5.0_09" class="java.beans.XMLDecoder"> 
+ <object class="mil.dtra.hpac.project.data.Project"> 
+  <void property="URL"> 
+   <string>file:/C:/HPAC5/users/Stage/series_zi.hpac5</string> 
+  </void> 
+  <void property="currentRunTime"> 
+   <object class="mil.dtra.hpac.project.data.Time"> 
+    <void property="valueAsString"> 
+     <string>20230825201500000,GMT+00:00</string> 
+    </void> 
+   </object> 
+  </void> 
+  <void property="flags"> 
+   <void property="audit"> 
+    <void property="HPACVersion"> 
+     <string>5.00.062 | T:5.0.060-S:2.303</string> 
+    </void> 
+    <void property="classification"> 
+     <string>Unclassified</string> 
+    </void> 
+    <void property="date"> 
+     <string>Tue Oct 31 14:42:45 2023</string> 
+    </void> 
+   </void> 
+  </void> 
+  <void property="incidents"> 
+   <array class="mil.dtra.hpac.models.impl.IncidentModelIfc" length="1"> 
+    <void index="0"> 
+     <object class="mil.dtra.hpac.models.analytic.CAcomp.impl.AnalyticImpl"> 
+      <void property="dirty"> 
+       <boolean>true</boolean> 
+      </void> 
+      <void property="incident"> 
+       <object class="mil.dtra.hpac.project.data.Incident"> 
+        <void property="ID"> 
+         <string>incident-1695259843712</string> 
+        </void> 
+        <void property="coord"> 
+         <void property="x"> 
+          <double>-99.140625</double> 
+         </void> 
+         <void property="y"> 
+          <double>40.78125</double> 
+         </void> 
+        </void> 
+        <void property="name"> 
+         <string>Analytic</string> 
+        </void> 
+        <void property="releaseList"> 
+         <void method="add"> 
+          <object class="mil.dtra.hpac.project.data.release.ContinuousRelease"> 
+           <void property="ID"> 
+            <string>ContinuousRelease-1695259843720</string> 
+           </void> 
+           <void property="dryMassFraction"> 
+            <void property="value"> 
+             <double>-1.0E36</double> 
+            </void> 
+           </void> 
+           <void property="duration"> 
+            <void property="unit"> 
+             <string>min</string> 
+            </void> 
+            <void property="value"> 
+             <double>1.0</double> 
+            </void> 
+           </void> 
+           <void property="horzSize"> 
+            <void property="value"> 
+             <double>100.0</double> 
+            </void> 
+           </void> 
+           <void property="incidentID"> 
+            <string>incident-1</string> 
+           </void> 
+           <void property="location"> 
+            <void property="coord"> 
+             <void property="x"> 
+              <double>-102.0</double> 
+             </void> 
+             <void property="y"> 
+              <double>42.0</double> 
+             </void> 
+            </void> 
+           </void> 
+           <void property="massMeanDiameter"> 
+            <void property="unit"> 
+             <string>µm</string> 
+            </void> 
+            <void property="value"> 
+             <double>1.0</double> 
+            </void> 
+           </void> 
+           <void property="massRate"> 
+            <void property="value"> 
+             <double>0.0020</double> 
+            </void> 
+           </void> 
+           <void property="material"> 
+            <object class="mil.dtra.hpac.material.data.Gas"> 
+             <void property="agentType"> 
+              <string>C&amp;I</string> 
+             </void> 
+             <void property="gasDensityProperty"> 
+              <object class="mil.dtra.hpac.material.data.schema.PropertyBean"> 
+               <void property="name"> 
+                <string>gasDensity</string> 
+               </void> 
+               <void property="type"> 
+                <string>float</string> 
+               </void> 
+               <void property="units"> 
+                <string>kg/m^3</string> 
+               </void> 
+               <void property="value"> 
+                <array class="java.lang.String" length="1"> 
+                 <void index="0"> 
+                  <string>4.1</string> 
+                 </void> 
+                </array> 
+               </void> 
+              </object> 
+             </void> 
+             <void property="gasDepVelocityProperty"> 
+              <object class="mil.dtra.hpac.material.data.schema.PropertyBean"> 
+               <void property="name"> 
+                <string>gasDepVelocity</string> 
+               </void> 
+               <void property="type"> 
+                <string>float</string> 
+               </void> 
+               <void property="units"> 
+                <string>m/s</string> 
+               </void> 
+               <void property="value"> 
+                <array class="java.lang.String" length="1"> 
+                 <void index="0"> 
+                  <string>0.0</string> 
+                 </void> 
+                </array> 
+               </void> 
+              </object> 
+             </void> 
+             <void property="longName"> 
+              <string>Generic Gas Material</string> 
+             </void> 
+             <void property="maxDayDecayProperty"> 
+              <object class="mil.dtra.hpac.material.data.schema.PropertyBean"> 
+               <void property="name"> 
+                <string>maxDayDecay</string> 
+               </void> 
+               <void property="type"> 
+                <string>float</string> 
+               </void> 
+               <void property="units"> 
+                <string>1/s</string> 
+               </void> 
+               <void property="value"> 
+                <array class="java.lang.String" length="1"> 
+                 <void index="0"> 
+                  <string>0.0</string> 
+                 </void> 
+                </array> 
+               </void> 
+              </object> 
+             </void> 
+             <void property="minNightDecayProperty"> 
+              <object class="mil.dtra.hpac.material.data.schema.PropertyBean"> 
+               <void property="name"> 
+                <string>minNightDecay</string> 
+               </void> 
+               <void property="type"> 
+                <string>float</string> 
+               </void> 
+               <void property="units"> 
+                <string>1/s</string> 
+               </void> 
+               <void property="value"> 
+                <array class="java.lang.String" length="1"> 
+                 <void index="0"> 
+                  <string>0.0</string> 
+                 </void> 
+                </array> 
+               </void> 
+              </object> 
+             </void> 
+             <void property="name"> 
+              <string>geng</string> 
+             </void> 
+             <void property="outputFieldsProperty"> 
+              <object class="mil.dtra.hpac.material.data.schema.PropertyBean"> 
+               <void property="name"> 
+                <string>outputFields</string> 
+               </void> 
+               <void property="type"> 
+                <string>string</string> 
+               </void> 
+               <void property="units"> 
+                <string>n/a</string> 
+               </void> 
+               <void property="value"> 
+                <array class="java.lang.String" length="1"> 
+                 <void index="0"> 
+                  <string>Surface Dosage</string> 
+                 </void> 
+                </array> 
+               </void> 
+              </object> 
+             </void> 
+             <void property="version"> 
+              <string>1.1</string> 
+             </void> 
+            </object> 
+           </void> 
+           <void property="puffDuration"> 
+            <void property="value"> 
+             <double>4.0</double> 
+            </void> 
+           </void> 
+           <void property="sigmaY"> 
+            <void property="value"> 
+             <double>0.1</double> 
+            </void> 
+           </void> 
+           <void property="sigmaZ"> 
+            <void property="value"> 
+             <double>0.1</double> 
+            </void> 
+           </void> 
+           <void property="startTime"> 
+            <void property="valueAsString"> 
+             <string>20230825080000000,GMT+00:00</string> 
+            </void> 
+           </void> 
+           <void property="statusMap"> 
+            <void method="put"> 
+             <string>buoyancy</string> 
+             <int>1</int> 
+            </void> 
+            <void method="put"> 
+             <string>releaseStatus</string> 
+             <int>5</int> 
+            </void> 
+            <void method="put"> 
+             <string>sigmaZ</string> 
+             <int>5</int> 
+            </void> 
+            <void method="put"> 
+             <string>massMeanDiameter</string> 
+             <int>1</int> 
+            </void> 
+            <void method="put"> 
+             <string>horzUncertainty</string> 
+             <int>1</int> 
+            </void> 
+            <void method="put"> 
+             <string>horzSize</string> 
+             <int>5</int> 
+            </void> 
+            <void method="put"> 
+             <string>vertSize</string> 
+             <int>1</int> 
+            </void> 
+            <void method="put"> 
+             <string>material</string> 
+             <int>1</int> 
+            </void> 
+            <void method="put"> 
+             <string>dryMassFraction</string> 
+             <int>1</int> 
+            </void> 
+            <void method="put"> 
+             <string>vertUncertainty</string> 
+             <int>1</int> 
+            </void> 
+            <void method="put"> 
+             <string>massSigma</string> 
+             <int>1</int> 
+            </void> 
+            <void method="put"> 
+             <string>massRate</string> 
+             <int>5</int> 
+            </void> 
+            <void method="put"> 
+             <string>momentum</string> 
+             <int>1</int> 
+            </void> 
+            <void method="put"> 
+             <string>puffDuration</string> 
+             <int>1</int> 
+            </void> 
+            <void method="put"> 
+             <string>distribution</string> 
+             <int>1</int> 
+            </void> 
+            <void method="put"> 
+             <string>startTime</string> 
+             <int>5</int> 
+            </void> 
+            <void method="put"> 
+             <string>location</string> 
+             <int>5</int> 
+            </void> 
+            <void method="put"> 
+             <string>sigmaY</string> 
+             <int>5</int> 
+            </void> 
+            <void method="put"> 
+             <string>duration</string> 
+             <int>5</int> 
+            </void> 
+           </void> 
+           <void property="vertSize"> 
+            <void property="value"> 
+             <double>2500.0</double> 
+            </void> 
+           </void> 
+          </object> 
+         </void> 
+        </void> 
+        <void property="startTime"> 
+         <void property="valueAsString"> 
+          <string>20230825080000000,GMT+00:00</string> 
+         </void> 
+        </void> 
+       </object> 
+      </void> 
+      <void property="what"> 
+       <object class="mil.dtra.hpac.models.analytic.CAcomp.data.AnalyticIncident"/> 
+      </void> 
+     </object> 
+    </void> 
+   </array> 
+  </void> 
+  <void property="name"> 
+   <string>series_zi</string> 
+  </void> 
+  <void id="OutputArray0" property="outputs"/> 
+  <void property="outputs"> 
+   <object idref="OutputArray0"/> 
+  </void> 
+  <void property="outputsAvailable"> 
+   <boolean>true</boolean> 
+  </void> 
+  <void property="resultArchiveFileURL"> 
+   <string>file:/C:/HPAC5/users/Stage/series_zi.hzip</string> 
+  </void> 
+  <void property="spatialDomain"> 
+   <void property="northEast"> 
+    <void property="coord"> 
+     <void property="x"> 
+      <double>-100.78983376677674</double> 
+     </void> 
+     <void property="y"> 
+      <double>42.89932877418734</double> 
+     </void> 
+    </void> 
+   </void> 
+   <void property="southWest"> 
+    <void property="coord"> 
+     <void property="x"> 
+      <double>-103.21016623322326</double> 
+     </void> 
+     <void property="y"> 
+      <double>41.10067122581266</double> 
+     </void> 
+    </void> 
+   </void> 
+  </void> 
+  <void property="temporalDomain"> 
+   <void property="computeDefaultFlag"> 
+    <boolean>false</boolean> 
+   </void> 
+   <void property="endTime"> 
+    <void property="valueAsString"> 
+     <string>20230826080100000,GMT+00:00</string> 
+    </void> 
+   </void> 
+   <void property="startTime"> 
+    <void property="valueAsString"> 
+     <string>20230825080000000,GMT+00:00</string> 
+    </void> 
+   </void> 
+  </void> 
+  <void property="urban"> 
+   <object class="mil.dtra.hpac.urban.UrbanManager"/> 
+  </void> 
+  <void property="version"> 
+   <string>5.00.062</string> 
+  </void> 
+  <void property="weather"> 
+   <void property="boundaryLayer"> 
+    <void property="surfaceBowenRatio"> 
+     <float>0.6</float> 
+    </void> 
+   </void> 
+   <void property="defaultWeather"> 
+    <boolean>false</boolean> 
+   </void> 
+   <void property="localWeatherSource"> 
+    <int>1</int> 
+   </void> 
+   <void property="meteorology"> 
+    <void property="metCurrent"> 
+     <boolean>true</boolean> 
+    </void> 
+    <void property="metFile1"> 
+     <void property="__Serializable_External_File"> 
+      <string>C:\HPAC5\users\Stage\met_(2,0).sfc</string> 
+     </void> 
+    </void> 
+    <void property="metFixed"> 
+     <boolean>false</boolean> 
+    </void> 
+    <void property="metOper"> 
+     <boolean>true</boolean> 
+    </void> 
+    <void property="metSurface"> 
+     <boolean>true</boolean> 
+    </void> 
+    <void property="upperAirDay"> 
+     <int>1</int> 
+    </void> 
+    <void property="upperAirMonth"> 
+     <int>8</int> 
+    </void> 
+   </void> 
+   <void property="terrain"> 
+    <void property="terType"> 
+     <int>0</int> 
+    </void> 
+   </void> 
+  </void> 
+  <void property="wxSpatialDomain"> 
+   <object class="mil.dtra.hpac.project.data.SpatialDomain"> 
+    <void property="northEast"> 
+     <void property="coord"> 
+      <void property="x"> 
+       <double>-100.78983376677674</double> 
+      </void> 
+      <void property="y"> 
+       <double>42.89932877418734</double> 
+      </void> 
+     </void> 
+    </void> 
+    <void property="southWest"> 
+     <void property="coord"> 
+      <void property="x"> 
+       <double>-103.21016623322326</double> 
+      </void> 
+      <void property="y"> 
+       <double>41.10067122581266</double> 
+      </void> 
+     </void> 
+    </void> 
+   </object> 
+  </void> 
+  <void property="wxTemporalDomain"> 
+   <object class="mil.dtra.hpac.project.data.TemporalDomain"> 
+    <void property="computeDefaultFlag"> 
+     <boolean>false</boolean> 
+    </void> 
+    <void property="endTime"> 
+     <void property="valueAsString"> 
+      <string>20230826120100000,GMT+00:00</string> 
+     </void> 
+    </void> 
+    <void property="startTime"> 
+     <void property="valueAsString"> 
+      <string>20230825080000000,GMT+00:00</string> 
+     </void> 
+    </void> 
+   </object> 
+  </void> 
+ </object> 
+</java> 

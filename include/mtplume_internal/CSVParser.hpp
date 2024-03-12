@@ -123,12 +123,26 @@ public:
         else if(config.computeMode == 5)
         {
             io::CSVReader<11, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
-            in.read_header(io::ignore_extra_column, "istab","U","zi","Q_mg","Dur","x","y","z", "zplume", "icurve","t");
+            in.read_header(io::ignore_extra_column, "istab","U","zi","Q_mg","dur","x","y","z", "zplume", "icurve","t");
             CSVDataRow row;
             while (in.read_row(row.istab, row.wind, row.hml,row.mass,row.dur,row.x, row.y, row.zrcp, row.zplume, row.icurve, row.t))
             {
                 row.sig_x = std::nan("");
                 row.sig_y = std::nan("");
+                rows.push_back(row);
+            }
+        }
+        else if(config.computeMode==6)
+        {
+            io::CSVReader<13, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
+            in.read_header(io::ignore_extra_column, "istab","U","zi","Q_mg","x", "y","sig_x0","sig_y0","sig_z0", "z","zplume", "icurve","t");
+            CSVDataRow row;
+            float istab;
+            float icurve;
+            while (in.read_row(istab, row.wind, row.hml,row.mass,row.x, row.y,row.sig_x,row.sig_y, row.sig_z, row.zrcp, row.zplume, icurve, row.t))
+            {
+                row.istab = (int)istab;
+                row.icurve = (int)icurve;
                 rows.push_back(row);
             }
         }

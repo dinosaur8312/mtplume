@@ -62,6 +62,10 @@ SimConfig JsonInputHandler::processJsonFile(const std::string& filePath) {
     {
         config.computeMode = 5;
     }
+    else if (config.refCSVPath.find("py_") != std::string::npos) 
+    {
+        config.computeMode = 6;
+    }
     else
     {
         config.computeMode = 3;
