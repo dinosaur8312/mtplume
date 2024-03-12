@@ -1002,3 +1002,83 @@ void generateSourceSigma(std::vector<CSVDataRow> data, std::vector<CSVDataRow> c
     std::cout << "Total number of test cases = " << data.size() << "\n";
     std::cout << "Pass rate = " << pass_rate << "%\n";
 }
+void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, std::ofstream &outputFile)
+{
+    // find min and max wind speed and x in coefs table
+    double xmin = 9999999.f;
+    double xmax = -9999999.f;
+    double windmin = 9999999.f;
+    double windmax = -9999999.f;
+
+    for (int i = 0; i < coefs.size(); i++)
+    {
+        auto row = coefs[i];
+        double x = row.x;
+        double wind = row.wind;
+        if (x < xmin)
+            xmin = x;
+        if (x > xmax)
+            xmax = x;
+        if (wind < windmin)
+            windmin = wind;
+        if (wind > windmax)
+            windmax = wind;
+    }
+
+    outputFile << "ID,istab,wind,x,y,z,icurve,t,sig_x,sig_y,sig_z, zfunc, cpeak, concentration, dinf, dose\n";
+
+    int pass_count = 0;
+    // loop over all rows in data
+    for (int i = 0; i < data.size(); i++)
+    {
+        auto row = data[i];
+        double x = row.x;
+        double y, z;
+        int istab = row.istab;
+        double wind = row.wind;
+
+// printf(" istab = %d, wind = %f \n", istab, wind);
+// print all row data
+#if (PRTCHECK)
+        printf("\ni=%d\n", i);
+        printf("row.istab: %d, row.wind: %f, row.x: %f, row.y: %f, row.z: %f, row.sig_x: %f, row.sig_y: %f, row.sig_z: %f\n", row.istab, row.wind, row.x, row.y, row.z, row.sig_x, row.sig_y, row.sig_z);
+#endif
+        if (x < xmin)
+            x = xmin;
+        if (x > xmax)
+            x = xmax;
+        // double logx = log(x);
+        // double logy, logz;
+
+        int id0, id1, id2, id3;
+        bool flag = false;
+        findFourCoefs(coefs, istab, wind, x, id0, id1, id2, id3, flag);
+#if (PRTCHECK)
+        printf("xk_flag, compareSigmaData, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
+#endif
+
+        calcData(coefs, id0, id1, id2, id3, x, row);
+
+        double zfunc = zFunction(row.zrcp, row.zplume, row.hml, row.sig_z);
+
+        double concentration = centerlineConcentration(
+            row.x, row.t, row.mass, row.wind, zfunc, row.sig_x, row.sig_y);
+        double dosage = centerlineDosage(
+            row.x, row.t, row.mass, row.wind, zfunc, row.sig_x, row.sig_y);
+
+        double defaultnan = -999.;
+        outputFile << i << "," << istab << "," << wind << ",";
+        outputFile << row.x << "," << row.y << "," << row.z << ",";
+        outputFile << row.icurve<<","<<row.t<< ",";
+        outputFile << row.sig_x << "," << row.sig_y << "," << row.sig_z << ",";
+        outputFile << zfunc << "," << defaultnan << "," << concentration <<","<< defaultnan<< ","<< dosage << "\n";
+
+    } // end of loop over all rows in data
+    outputFile.close();
+    std::cout << "CSV file has been written successfully.\n";
+
+    double pass_rate = (double)pass_count / (double)data.size() * 100;
+    // print total number of test cases
+    std::cout << "Total number of test cases = " << data.size() << "\n";
+    std::cout << "Pass rate = " << pass_rate << "%\n";
+}

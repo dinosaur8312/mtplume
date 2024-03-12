@@ -20,6 +20,7 @@ void compareXData(std::vector<CSVDataRow> coefs, const int id0, const int id1, c
                       const int sigid);
 void compareZfunction(std::vector<CSVDataRow> data, std::ofstream &outputFile);
 void generateSample(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, std::ofstream &outputFile);
+void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, std::ofstream &outputFile);
 void generateSourceSigma(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, std::ofstream &outputFile);
 
 template <int N>
@@ -116,6 +117,11 @@ public:
         if(computeMode ==4)
         {
             generateSourceSigma(data, coefs, outputFile);
+            return;
+        }
+        if(computeMode ==5)
+        {
+            generateDose(data, coefs, outputFile);
             return;
         }
 

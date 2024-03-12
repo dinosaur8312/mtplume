@@ -58,6 +58,10 @@ SimConfig JsonInputHandler::processJsonFile(const std::string& filePath) {
     {
         config.computeMode = 4;
     }
+    else if (config.refCSVPath.find("dose_v") != std::string::npos) 
+    {
+        config.computeMode = 5;
+    }
     else
     {
         config.computeMode = 3;
