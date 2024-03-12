@@ -1060,9 +1060,64 @@ void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, s
         calcData(coefs, id0, id1, id2, id3, x, row);
 
         double zfunc = zFunction(row.zrcp, row.zplume, row.hml, row.sig_z);
+        double yfunc = pdfFunction( row.y,row.sig_y);
 
-        double concentration = centerlineConcentration(
-            row.x, row.t, row.mass, row.wind, zfunc, row.sig_x, row.sig_y);
+        double qyz = row.mass * yfunc *zfunc;
+        double xfunc, concentration, cpeak, xfuncp;
+        double tip, tail;
+        double dosage;
+        double dinf;
+        if(row.t>=0)
+        {
+            if(row.dur<1)
+            {
+                xfunc = pdfFunction( row.wind*row.t-row.x,row.sig_x);
+                concentration = xfunc * qyz;
+                xfuncp = pdfFunction( std::min(row.x,0.f),row.sig_x);
+                cpeak = xfuncp*qyz;
+                tail = 0;
+                tip = 0;
+
+                double arg0= -row.x;
+                double arg1 = row.wind*row.t-row.x;
+                xfunc = cdfFunction(arg1,row.sig_x)-cdfFunction(arg0,row.sig_x);
+                dosage = xfunc*qyz;
+                double xfuncinf = (1.f- cdfFunction(arg0,row.sig_x))/row.wind;
+                dinf = xfuncinf*qyz;
+            }
+            else
+            {
+                 tip = cdfFunction(row.wind*row.t-row.x,row.sig_x);
+                double ut = std::max(0.f,row.t) * row.wind-row.dur;
+                tail = cdfFunction(ut-row.x,row.sig_x);
+                concentration = (tip-tail)*qyz/row.wind / row.dur;
+
+                double arg = 0.5*row.wind*row.dur/row.sig_x;
+                xfuncp = 1.f/(row.wind*row.dur)*(2.f*cdfFunction(arg, 1.f)-1.f);
+
+                xfuncp *= gaussFunction(std::min(row.x,0.f))/row.sig_x;
+                cpeak = xfuncp*qyz;
+
+                double tip1 = IcdfFunction(row.wind*row.t-row.x,row.sig_x);
+                double tip0 = IcdfFunction(-row.x,row.sig_x);
+                tip = tip1-tip0;
+
+                double tail0 = cdfFunction(-row.x,row.sig_x) * std::min(row.t,row.dur) * row.wind/row.sig_x;
+
+                arg = std::max(0.f,row.t) * row.wind - row.dur;
+                double tail2 = IcdfFunction(arg-row.x,row.sig_x);
+                double tail1 = IcdfFunction(-row.x,row.sig_x);
+                tail = tail2-tail1+tail0;
+                double const_tmp = qyz*row.sig_x/(row.dur*(row.wind*row.wind));
+                dosage = (tip-tail)*const_tmp;
+                dinf = qyz/row.wind;
+                dinf *= cdfFunction(-row.x,row.sig_x);
+
+
+            }
+
+        }
+
         double dosage = centerlineDosage(
             row.x, row.t, row.mass, row.wind, zfunc, row.sig_x, row.sig_y);
 

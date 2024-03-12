@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 #include "CSVParser.hpp"
 #include "SimConfig.hpp"
 #define PRTCHECK 1
@@ -82,6 +83,31 @@ inline float zFunction(float zrcp, float zplume, float hml, float sigz)
     return INV_ROOT2PI / sigz * zrefl;
 }
 
+inline float gaussFunction( float x)
+{
+
+    return  exp(-0.5f * x * x) ;
+}
+inline float pdfFunction( float y,float sigy = 1.f)
+{
+    static constexpr float INV_ROOT2PI = 0.3989422804014327;
+    float arg = y / sigy;
+
+    return INV_ROOT2PI* exp(-0.5f * arg * arg) /sigy;
+}
+
+inline float cdfFunction(float x, float scale = 1.f)
+{
+    static constexpr float INV_SQRT2 = 0.7071067811865475;
+    return 0.5f * (1.f + erf(INV_SQRT2 * (x/scale)));
+}
+
+inline float IcdfFunction(float x, float scale = 1.f)
+{
+    float xs = x/scale;
+
+    return xs*cdfFunction(x, scale)+pdfFunction(x/scale);
+}
 class SigmaInterp
 {
 
