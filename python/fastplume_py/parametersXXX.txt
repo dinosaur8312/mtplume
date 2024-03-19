@@ -1,0 +1,11 @@
+Run_Date: 2023-11-26
+
+ID: 2023-11-03
+zi : 5500, m
+
+ReleaseDuration : 1.0, min
+MassRate : 2.0e-3, kg/sec
+Q_kg : 0.12, kg
+Q_mg : 1.2e5, mg
+
+
