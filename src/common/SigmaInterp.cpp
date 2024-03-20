@@ -124,6 +124,8 @@ void findFourCoefs_sig(std::vector<CSVDataRow> coefs, const int istab, const flo
     std::vector<std::vector<double>> windgap_min(2, std::vector<double>(2, 9999999.f));
     std::vector<std::vector<double>> xgap_min(2, std::vector<double>(2, 9999999.f));
 
+    printf("windgap_min01=%f\n",windgap_min[0][1]);
+
     int jminwind = -1;
     int jmaxwind = -1;
     for (int j = 0; j < coefs.size(); j++)
@@ -161,6 +163,9 @@ void findFourCoefs_sig(std::vector<CSVDataRow> coefs, const int istab, const flo
             }
         }
     }
+
+    windgap_min[0][0]= 9999999.f;
+    windgap_min[0][1]= 9999999.f;
     printf("jminwind=%d\n", jminwind);
     printf("jmaxwind=%d\n", jmaxwind);
 
@@ -184,8 +189,8 @@ void findFourCoefs_sig(std::vector<CSVDataRow> coefs, const int istab, const flo
         double windgap = abs(wind_coef - wind);
         double xgap = abs(x_coef - x);
 
-    /*
-        if((sigid==1)&&(j>168)&&(j<175))
+    
+        if((sigid==0)&&(j>279)&&(j<285))
         {
         printf("\nj=%d\n",j);
         printf("sigma target=%f\n",x);
@@ -193,48 +198,59 @@ void findFourCoefs_sig(std::vector<CSVDataRow> coefs, const int istab, const flo
         printf("wind_coef=%f\n",wind_coef);
         printf("sigma source=%f\n",x_coef);
         printf("windgap=%f\n",windgap);
-        printf("xgap=%f\n",xgap);
+        printf("sig_gap=%f\n",xgap);
+        printf("wind_gap_min01=%f\n",  windgap_min[0][1]);
         }
-*/
+
         if (wind_coef <= wind)
         {
-            /*
-            if((sigid==1)&&(j>168)&&(j<175))
+            
+            if((sigid==0)&&(j>279)&&(j<285))
             {
-                printf("flag wind0\n");
+                printf("wind_coef<wind\n");
             }
-            */
+            
             if (windgap <= (windgap_min[0][0] + EPSILON))
-            {/*
-                if((sigid==1)&&(j>168)&&(j<175))
+            {
+                if((sigid==0)&&(j>279)&&(j<285))
                 {
-                    printf("thresh wind0\n");
-                    printf("xgap=%f,xgap_min00=%f\n", xgap, xgap_min[0][0]);
-                    printf("x_coef=%f,x=%f\n", x_coef, x);
+                    printf("closer wind found\n");
+                    printf("sig_gap=%f,sig_gap_min00=%f\n", xgap, xgap_min[0][0]);
+                    printf("sig_coef=%f,sig=%f\n", x_coef, x);
                 }
-                */
                 if (x_coef <= x)
                 {
-                    printf("x_coef<=x\n");
+                        if ((sigid == 0) && (j > 279) && (j < 285))
+                    printf("sig_coef<=sig\n");
                     if (xgap <= (xgap_min[0][0] + EPSILON))
                     {
                         xgap_min[0][0] = xgap;
                         windgap_min[0][0] = windgap;
                         id0 = j;
-                        if ((sigid == 2) && (j > 180) && (j < 185))
-                            printf("XXXXXXXXX FOUND id0\n");
+                        if ((sigid == 0) && (j > 279) && (j < 285))
+                           printf("XXXXXXXXX FOUND id0\n");
                     }
                 }
             }
+                if((sigid==0)&&(j>279)&&(j<285))
+                {
+                    printf("wind_gap=%f,wind_gap_min01=%f\n", windgap, windgap_min[0][1]);
+                }
 
             if (windgap <= (windgap_min[0][1] + EPSILON))
             {
-                /*
-                if((sigid==2)&&(j>168)&&(j<172))
+                
+                if((sigid==0)&&(j>279)&&(j<285))
                 {
                     printf("thresh wind1\n");
                 }
-                */
+                if((sigid==0)&&(j>279)&&(j<285))
+                {
+                    printf("thresh wind0\n");
+                    printf("xgap=%f,xgap_min01=%f\n", xgap, xgap_min[0][1]);
+                    printf("x_coef=%f,x=%f\n", x_coef, x);
+                }
+                
                 if (x_coef > x)
                 {
                     if (xgap <= (xgap_min[0][1] + EPSILON))
@@ -242,8 +258,8 @@ void findFourCoefs_sig(std::vector<CSVDataRow> coefs, const int istab, const flo
                         xgap_min[0][1] = xgap;
                         windgap_min[0][1] = windgap;
                         id1 = j;
-                        // printf("XXXXXXXXX FOUND id1\n");
-                        // printf("xgap_min01=%f,windgap_min01=%f,id1=%d\n",xgap,windgap,j);
+                         printf("XXXXXXXXX FOUND id1\n");
+                         printf("xgap_min01=%f,windgap_min01=%f,id1=%d\n",xgap,windgap,j);
                     }
                 }
             }
@@ -794,31 +810,45 @@ void calcData_virtual_new(std::vector<CSVDataRow> coefs, const int id0, const in
         sig_x2 = row2.sig_z;
         sig_x3 = row3.sig_z;
     }
+    printf("\n calcData_virtual_new\n");
+    
+    printf("sig_x0=%f,sig_x1=%f,sig_x2=%f,sig_x3=%f\n",sig_x0,sig_x1,sig_x2,sig_x3);
+
     double log_sig_x0, log_sig_x1, log_sig_x2, log_sig_x3;
     log_sig_x0 = log(sig_x0);
     log_sig_x1 = log(sig_x1);
     log_sig_x2 = log(sig_x2);
     log_sig_x3 = log(sig_x3);
+    double log_sig = log(sig);
+    printf("log_sig=%f\n",log_sig);
+    printf("log_sig_x0=%f,log_sig_x1=%f,log_sig_x2=%f,log_sig_x3=%f\n",log_sig_x0,log_sig_x1,log_sig_x2,log_sig_x3);
     double w_wind = id0 == id2 ? 0.f : (row.wind - row0.wind) / (row2.wind - row0.wind);
 
     double log_sig_x02, log_sig_x13;
     log_sig_x02 = (1.f - w_wind) * log_sig_x0 + w_wind * log_sig_x2;
     log_sig_x13 = (1.f - w_wind) * log_sig_x1 + w_wind * log_sig_x3;
 
+    printf("log_sig_x02=%f,log_sig_x13=%f\n",log_sig_x02,log_sig_x13);
 
     double logx0 = log(x0);
     double logx1 = log(x1);
     double logx2 = log(x2);
     double logx3 = log(x3);
+    printf("x0=%f,x1=%f,x2=%f,x3=%f\n",x0,x1,x2,x3);
+    printf("logx0=%f,logx1=%f,logx2=%f,logx3=%f\n",logx0,logx1,logx2,logx3);
 
-    double log_sig = log(sig);
 
     //double wx01 = id0 == id1 ? 0.f : (logx - logx0) / (logx1 - logx0);
     //double wx23 = id2 == id3 ? 0.f : (logx - logx2) / (logx3 - logx2);
 
     double w_sig = id0 == id2 ? 0.f : (log_sig - log_sig_x02) / (log_sig_x13 - log_sig_x02);
+    printf("w_sig=%f\n",w_sig);
 
-    double log_x_coef = (1.-w_sig) * logx0 + w_sig * logx2;
+    double log_x_coef = (1.-w_sig) * logx0 + w_sig * logx1;
+    printf("log_x_coef=%f\n",log_x_coef);
+    printf("x_coef=%f\n",exp(log_x_coef));
+
+
 
     if (xid == 0)
         row.xv = exp(log_x_coef);
@@ -1002,6 +1032,7 @@ void generateSourceSigma(std::vector<CSVDataRow> data, std::vector<CSVDataRow> c
         printf("\ni=%d\n", i);
         printf("row.istab: %d, row.wind: %f, row.x: %f, row.y: %f, row.z: %f, row.sig_x: %f, row.sig_y: %f, row.sig_z: %f\n", row.istab, row.wind, row.x, row.y, row.z, row.sig_x, row.sig_y, row.sig_z);
 #endif
+        /*
         if (x < xmin)
             x = xmin;
         if (x > xmax)
@@ -1014,6 +1045,7 @@ void generateSourceSigma(std::vector<CSVDataRow> data, std::vector<CSVDataRow> c
             z = zmin;
         if (z > zmax)
             z = zmax;
+            */
         printf("clip sig_x = %f\n", x);
         printf("clip sig_y = %f\n", y);
         printf("clip sig_z = %f\n", z);
@@ -1273,6 +1305,7 @@ void generateComplete(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coef
         printf("\ni=%d\n", i);
         printf("row.istab: %d, row.wind: %f, row.x: %f, row.y: %f, row.z: %f, row.sig_x: %f, row.sig_y: %f, row.sig_z: %f\n", row.istab, row.wind, row.x, row.y, row.z, row.sig_x, row.sig_y, row.sig_z);
 #endif
+    /*
         if (x < xmin)
             x = xmin;
         if (x > xmax)
@@ -1285,6 +1318,7 @@ void generateComplete(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coef
             z = zmin;
         if (z > zmax)
             z = zmax;
+            */
         printf("clip sig_x = %f\n", x);
         printf("clip sig_y = %f\n", y);
         printf("clip sig_z = %f\n", z);
