@@ -60,10 +60,10 @@ inline double zFunction(double zrcp, double zplume, double hml, double sigz)
             return 0.;
         if(sigz>hml)
             return 1. / hml;
-        zplume = zplume < 1.0e-3 ? 1.0e-3 : zplume;
+        zplume = std::max(0.001, zplume);
 
         if(zplume<=hml)
-            zplume = (hml-0.001)<zplume?hml-0.001:zplume;
+            zplume = std::min(hml-0.001, zplume);
 
         zrefl = zReflections<0>(zrcp, zplume, hml, sigz);
         

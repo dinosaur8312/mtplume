@@ -1,0 +1,5 @@
+{
+    "coefs_CSV": "../tests/unit_tests/hpac_dispersion_coefs.csv",
+    "reference_CSV": "../tests/unit_tests/py_(5.0,D)_zi=all.csv",
+    "outputCSV": "output_py_zi_all.csv"
+}
