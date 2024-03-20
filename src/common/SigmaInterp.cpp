@@ -621,6 +621,7 @@ void calcSigma(std::vector<CSVDataRow> coefs, const int id0, const int id1, cons
     double sig_x0, sig_x1, sig_x2, sig_x3;
     double log_sig_x0, log_sig_x1, log_sig_x2, log_sig_x3;
     double log_sig_x01, log_sig_x23;
+    double log_sig_x02, log_sig_x13;
     double log_sig_x_coef;
 
     if (comp == 0)
@@ -651,10 +652,13 @@ void calcSigma(std::vector<CSVDataRow> coefs, const int id0, const int id1, cons
     log_sig_x2 = log(sig_x2);
     log_sig_x3 = log(sig_x3);
 
+    //log_sig_02 = (1.f- w_wind) * log_sig_x0 + w_wind * log_sig_x2;
+    //log_sig_13 = (1.f- w_wind) * log_sig_x1 + w_wind * log_sig_x3;
+
     log_sig_x01 = (1.f - wx01) * log_sig_x0 + wx01 * log_sig_x1;
     log_sig_x23 = (1.f - wx23) * log_sig_x2 + wx23 * log_sig_x3;
-    printf("log_sig_x0=%f, log_sig_x1=%f,log_sig_x2=%f,log_sig_x3=%f\n", log_sig_x0, log_sig_x1, log_sig_x2, log_sig_x3);
-    printf("log_sig_x01=%f, log_sig_x23=%f\n", log_sig_x01, log_sig_x23);
+    //printf("log_sig_x0=%f, log_sig_x1=%f,log_sig_x2=%f,log_sig_x3=%f\n", log_sig_x0, log_sig_x1, log_sig_x2, log_sig_x3);
+    //printf("log_sig_x01=%f, log_sig_x23=%f\n", log_sig_x01, log_sig_x23);
 
     log_sig_x_coef = (1.f - w_wind) * log_sig_x01 + w_wind * log_sig_x23;
     if (comp == 0)
@@ -734,6 +738,74 @@ void calcData_virtual(std::vector<CSVDataRow> coefs, const int id0, const int id
         row.yv = exp(log_sig_x_coef);
     else if (xid == 2)
         row.zv = exp(log_sig_x_coef);
+}
+void calcData_virtual_new(std::vector<CSVDataRow> coefs, const int id0, const int id1, const int id2, const int id3, double sig,
+                      CSVDataRow &row, const int xid)
+{
+    auto row0 = coefs[id0];
+    auto row1 = coefs[id1];
+    auto row2 = coefs[id2];
+    auto row3 = coefs[id3];
+
+    double x0, x1, x2, x3;
+    double sig_x0, sig_x1, sig_x2, sig_x3;
+    x0 = row0.x;
+    x1 = row1.x;
+    x2 = row2.x;
+    x3 = row3.x;
+    if (xid == 0)
+    {
+        sig_x0 = row0.sig_x;
+        sig_x1 = row1.sig_x;
+        sig_x2 = row2.sig_x;
+        sig_x3 = row3.sig_x;
+    }
+    if (xid == 1)
+    {
+        sig_x0 = row0.sig_y;
+        sig_x1 = row1.sig_y;
+        sig_x2 = row2.sig_y;
+        sig_x3 = row3.sig_y;
+    }
+    if (xid == 2)
+    {
+        sig_x0 = row0.sig_z;
+        sig_x1 = row1.sig_z;
+        sig_x2 = row2.sig_z;
+        sig_x3 = row3.sig_z;
+    }
+    double log_sig_x0, log_sig_x1, log_sig_x2, log_sig_x3;
+    log_sig_x0 = log(sig_x0);
+    log_sig_x1 = log(sig_x1);
+    log_sig_x2 = log(sig_x2);
+    log_sig_x3 = log(sig_x3);
+    double w_wind = id0 == id2 ? 0.f : (row.wind - row0.wind) / (row2.wind - row0.wind);
+
+    double log_sig_x02, log_sig_x13;
+    log_sig_x02 = (1.f - w_wind) * log_sig_x0 + w_wind * log_sig_x2;
+    log_sig_x13 = (1.f - w_wind) * log_sig_x1 + w_wind * log_sig_x3;
+
+
+    double logx0 = log(x0);
+    double logx1 = log(x1);
+    double logx2 = log(x2);
+    double logx3 = log(x3);
+
+    double log_sig = log(sig);
+
+    //double wx01 = id0 == id1 ? 0.f : (logx - logx0) / (logx1 - logx0);
+    //double wx23 = id2 == id3 ? 0.f : (logx - logx2) / (logx3 - logx2);
+
+    double w_sig = id0 == id2 ? 0.f : (log_sig - log_sig_x02) / (log_sig_x13 - log_sig_x02);
+
+    double log_x_coef = (1.-w_sig) * logx0 + w_sig * logx2;
+
+    if (xid == 0)
+        row.xv = exp(log_x_coef);
+    else if (xid == 1)
+        row.yv = exp(log_x_coef);
+    else if (xid == 2)
+        row.zv = exp(log_x_coef);
 }
 
 inline double normcdf(double x)
@@ -1206,17 +1278,17 @@ void generateComplete(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coef
         printf("xk_flag, compareSigmaData:sigmax search, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
 #endif
 
-        calcData_virtual(coefs, id0, id1, id2, id3, x, row, 0);
+        calcData_virtual_new(coefs, id0, id1, id2, id3, x, row, 0);
         printf("xk_flag, compareSigmaData, row.xv = %f\n", row.xv);
 
         findFourCoefs_sig(coefs, istab, wind, y, id0, id1, id2, id3, flag, 1);
         printf("xk_flag, compareSigmaData:sigmay search, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
-        calcData_virtual(coefs, id0, id1, id2, id3, y, row, 1);
+        calcData_virtual_new(coefs, id0, id1, id2, id3, y, row, 1);
         printf("xk_flag, compareSigmaData, row.yv = %f\n", row.yv);
 
         findFourCoefs_sig(coefs, istab, wind, z, id0, id1, id2, id3, flag, 2);
         printf("xk_flag, compareSigmaData:sigmaz search, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
-        calcData_virtual(coefs, id0, id1, id2, id3, z, row, 2);
+        calcData_virtual_new(coefs, id0, id1, id2, id3, z, row, 2);
 #if (PRTCHECK)
         printf("xk_flag, compareSigmaData, row.zv = %f\n", row.zv);
 #endif

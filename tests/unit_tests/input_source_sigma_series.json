@@ -1,5 +1,5 @@
 {
     "coefs_CSV": "../tests/unit_tests/hpac_dispersion_coefs.csv",
     "reference_CSV": "../tests/unit_tests/source_sigma_series_in.csv",
-    "outputCSV": "output_source_sigma_series.csv"
+    "outputCSV": "output_source_sigma_series_new.csv"
 }
