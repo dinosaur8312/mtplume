@@ -184,44 +184,48 @@ void findFourCoefs_sig(std::vector<CSVDataRow> coefs, const int istab, const flo
         double windgap = abs(wind_coef - wind);
         double xgap = abs(x_coef - x);
 
-        if ((sigid == 2) && (j > 168) && (j < 172))
+        if ((sigid == 2) && (j > 180) && (j < 185))
         {
             printf("\nj=%d\n", j);
-            printf("x=%f\n", x);
+            printf("sig=%f\n", x);
 
             printf("wind_coef=%f\n", wind_coef);
-            printf("x_coef=%f\n", x_coef);
+            printf("sig_coef=%f\n", x_coef);
             printf("windgap=%f\n", windgap);
-            printf("xgap=%f\n", xgap);
+            printf("siggap=%f\n", xgap);
         }
 
         if (wind_coef <= wind)
         {
-            if ((sigid == 2) && (j > 168) && (j < 172))
+            if ((sigid == 2) && (j > 180) && (j < 185))
             {
                 printf("flag wind0\n");
             }
             if (windgap <= (windgap_min[0][0] + EPSILON))
             {
-                if ((sigid == 2) && (j > 168) && (j < 172))
+                if ((sigid == 2) && (j > 180) && (j < 185))
                 {
                     printf("thresh wind0\n");
+                    printf("xgap=%f,xgap_min00=%f\n", xgap, xgap_min[0][0]);
+                    printf("x_coef=%f,x=%f\n", x_coef, x);
                 }
                 if (x_coef <= x)
                 {
+                    printf("x_coef<=x\n");
                     if (xgap <= (xgap_min[0][0] + EPSILON))
                     {
                         xgap_min[0][0] = xgap;
                         windgap_min[0][0] = windgap;
                         id0 = j;
-                        //    printf("XXXXXXXXX FOUND id0\n");
+                        if ((sigid == 2) && (j > 180) && (j < 185))
+                            printf("XXXXXXXXX FOUND id0\n");
                     }
                 }
             }
 
             if (windgap <= (windgap_min[0][1] + EPSILON))
             {
-                if ((sigid == 2) && (j > 168) && (j < 172))
+                if ((sigid == 2) && (j > 180) && (j < 185))
                 {
                     printf("thresh wind1\n");
                 }
@@ -240,7 +244,7 @@ void findFourCoefs_sig(std::vector<CSVDataRow> coefs, const int istab, const flo
         }
         else
         {
-            if ((sigid == 2) && (j > 168) && (j < 172))
+            if ((sigid == 2) && (j > 180) && (j < 185))
             {
                 printf("flag wind1\n");
             }
@@ -1273,33 +1277,53 @@ void generateComplete(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coef
 
         int id0, id1, id2, id3;
         bool flag = false;
-        findFourCoefs_sig(coefs, istab, wind, x, id0, id1, id2, id3, flag, 0);
-#if (PRTCHECK)
-        printf("xk_flag, compareSigmaData:sigmax search, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
-#endif
 
-        calcData_virtual_new(coefs, id0, id1, id2, id3, x, row, 0);
+        if(x>EPSILON)
+        {
+            findFourCoefs_sig(coefs, istab, wind, x, id0, id1, id2, id3, flag, 0);
+#if (PRTCHECK)
+            printf("xk_flag, compareSigmaData:sigmax search, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
+#endif
+            calcData_virtual_new(coefs, id0, id1, id2, id3, x, row, 0);
+        }
+        else
+            row.xv = 0;
         printf("xk_flag, compareSigmaData, row.xv = %f\n", row.xv);
 
-        findFourCoefs_sig(coefs, istab, wind, y, id0, id1, id2, id3, flag, 1);
-        printf("xk_flag, compareSigmaData:sigmay search, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
-        calcData_virtual_new(coefs, id0, id1, id2, id3, y, row, 1);
+        if(y>EPSILON)
+        {
+            findFourCoefs_sig(coefs, istab, wind, y, id0, id1, id2, id3, flag, 1);
+            printf("xk_flag, compareSigmaData:sigmay search, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
+            calcData_virtual_new(coefs, id0, id1, id2, id3, y, row, 1);
+        }
+        else
+            row.yv = 0;
         printf("xk_flag, compareSigmaData, row.yv = %f\n", row.yv);
 
-        findFourCoefs_sig(coefs, istab, wind, z, id0, id1, id2, id3, flag, 2);
-        printf("xk_flag, compareSigmaData:sigmaz search, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
-        calcData_virtual_new(coefs, id0, id1, id2, id3, z, row, 2);
+
+        if(z>EPSILON)
+        {
+            findFourCoefs_sig(coefs, istab, wind, z, id0, id1, id2, id3, flag, 2);
+            printf("xk_flag, compareSigmaData:sigmaz search, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
+            calcData_virtual_new(coefs, id0, id1, id2, id3, z, row, 2);
+        }
+        else
+            row.zv = 0;
 #if (PRTCHECK)
         printf("xk_flag, compareSigmaData, row.zv = %f\n", row.zv);
 #endif
+
         printf("xk_flag, compareSigmaData, row.x+row.xv = %f\n", row.x + row.xv);
         findFourCoefs(coefs, istab, wind, row.x + row.xv, id0, id1, id2, id3, flag);
         printf("xk_flag, compareSigmaData: x search: id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", id0, id1, id2, id3);
         calcSigma(coefs, id0, id1, id2, id3, row.x + row.xv, row, 0);
 
+        printf("xk_flag, compareSigmaData, row.x+row.yv = %f\n", row.x + row.yv);
         findFourCoefs(coefs, istab, wind, row.x + row.yv, id0, id1, id2, id3, flag);
         printf("xk_flag, compareSigmaData: y search: id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", id0, id1, id2, id3);
         calcSigma(coefs, id0, id1, id2, id3, row.yv + row.x, row, 1);
+
+        printf("xk_flag, compareSigmaData, row.x+row.zv = %f\n", row.x + row.zv);
         findFourCoefs(coefs, istab, wind, row.x + row.zv, id0, id1, id2, id3, flag);
         printf("xk_flag, compareSigmaData: z search: id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", id0, id1, id2, id3);
         calcSigma(coefs, id0, id1, id2, id3, row.zv + row.x, row, 2);
