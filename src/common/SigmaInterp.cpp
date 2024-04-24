@@ -184,50 +184,52 @@ void findFourCoefs_sig(std::vector<CSVDataRow> coefs, const int istab, const flo
         double windgap = abs(wind_coef - wind);
         double xgap = abs(x_coef - x);
 
-        if ((sigid == 2) && (j > 180) && (j < 185))
-        {
-            printf("\nj=%d\n", j);
-            printf("sig=%f\n", x);
+        /*
+            if ((sigid == 0) && (j > 180) && (j < 185))
+            {
+                printf("\nj=%d\n", j);
+                printf("sig=%f\n", x);
 
-            printf("wind_coef=%f\n", wind_coef);
-            printf("sig_coef=%f\n", x_coef);
-            printf("windgap=%f\n", windgap);
-            printf("siggap=%f\n", xgap);
-        }
-
+                printf("wind_coef=%f\n", wind_coef);
+                printf("sig_coef=%f\n", x_coef);
+                printf("windgap=%f\n", windgap);
+                printf("siggap=%f\n", xgap);
+            }
+    */
         if (wind_coef <= wind)
         {
-            if ((sigid == 2) && (j > 180) && (j < 185))
-            {
-                printf("flag wind0\n");
-            }
+            //          if ((sigid == 0) && (j > 180) && (j < 185))
+            //        {
+            //          printf("flag wind0\n");
+            //        printf("windgap_min00=%f\n", windgap_min[0][0]);
+            //  }
             if (windgap <= (windgap_min[0][0] + EPSILON))
             {
-                if ((sigid == 2) && (j > 180) && (j < 185))
+                if ((sigid == 0) && (j > 180) && (j < 185))
                 {
-                    printf("thresh wind0\n");
-                    printf("xgap=%f,xgap_min00=%f\n", xgap, xgap_min[0][0]);
-                    printf("x_coef=%f,x=%f\n", x_coef, x);
+                    //     printf("thresh wind0\n");
+                    // printf("xgap=%f,xgap_min00=%f\n", xgap, xgap_min[0][0]);
+                    // printf("x_coef=%f,x=%f\n", x_coef, x);
                 }
                 if (x_coef <= x)
                 {
-                    printf("x_coef<=x\n");
+                    // printf("x_coef<=x\n");
                     if (xgap <= (xgap_min[0][0] + EPSILON))
                     {
                         xgap_min[0][0] = xgap;
                         windgap_min[0][0] = windgap;
                         id0 = j;
-                        if ((sigid == 2) && (j > 180) && (j < 185))
-                            printf("XXXXXXXXX FOUND id0\n");
+                        // if ((sigid == 0) && (j > 180) && (j < 185))
+                        //   printf("XXXXXXXXX FOUND id0\n");
                     }
                 }
             }
 
             if (windgap <= (windgap_min[0][1] + EPSILON))
             {
-                if ((sigid == 2) && (j > 180) && (j < 185))
+                if ((sigid == 0) && (j > 180) && (j < 185))
                 {
-                    printf("thresh wind1\n");
+                    //  printf("thresh wind1\n");
                 }
                 if (x_coef > x)
                 {
@@ -244,10 +246,10 @@ void findFourCoefs_sig(std::vector<CSVDataRow> coefs, const int istab, const flo
         }
         else
         {
-            if ((sigid == 2) && (j > 180) && (j < 185))
-            {
-                printf("flag wind1\n");
-            }
+            // if ((sigid == 0) && (j > 180) && (j < 185))
+            //{
+            //  printf("flag wind1\n");
+            //}
             if (windgap <= (windgap_min[1][0] + EPSILON))
             {
 
@@ -656,13 +658,13 @@ void calcSigma(std::vector<CSVDataRow> coefs, const int id0, const int id1, cons
     log_sig_x2 = log(sig_x2);
     log_sig_x3 = log(sig_x3);
 
-    //log_sig_02 = (1.f- w_wind) * log_sig_x0 + w_wind * log_sig_x2;
-    //log_sig_13 = (1.f- w_wind) * log_sig_x1 + w_wind * log_sig_x3;
+    // log_sig_02 = (1.f- w_wind) * log_sig_x0 + w_wind * log_sig_x2;
+    // log_sig_13 = (1.f- w_wind) * log_sig_x1 + w_wind * log_sig_x3;
 
     log_sig_x01 = (1.f - wx01) * log_sig_x0 + wx01 * log_sig_x1;
     log_sig_x23 = (1.f - wx23) * log_sig_x2 + wx23 * log_sig_x3;
-    //printf("log_sig_x0=%f, log_sig_x1=%f,log_sig_x2=%f,log_sig_x3=%f\n", log_sig_x0, log_sig_x1, log_sig_x2, log_sig_x3);
-    //printf("log_sig_x01=%f, log_sig_x23=%f\n", log_sig_x01, log_sig_x23);
+    // printf("log_sig_x0=%f, log_sig_x1=%f,log_sig_x2=%f,log_sig_x3=%f\n", log_sig_x0, log_sig_x1, log_sig_x2, log_sig_x3);
+    // printf("log_sig_x01=%f, log_sig_x23=%f\n", log_sig_x01, log_sig_x23);
 
     log_sig_x_coef = (1.f - w_wind) * log_sig_x01 + w_wind * log_sig_x23;
     if (comp == 0)
@@ -744,7 +746,7 @@ void calcData_virtual(std::vector<CSVDataRow> coefs, const int id0, const int id
         row.zv = exp(log_sig_x_coef);
 }
 void calcData_virtual_new(std::vector<CSVDataRow> coefs, const int id0, const int id1, const int id2, const int id3, double sig,
-                      CSVDataRow &row, const int xid)
+                          CSVDataRow &row, const int xid)
 {
     auto row0 = coefs[id0];
     auto row1 = coefs[id1];
@@ -778,17 +780,21 @@ void calcData_virtual_new(std::vector<CSVDataRow> coefs, const int id0, const in
         sig_x2 = row2.sig_z;
         sig_x3 = row3.sig_z;
     }
+    printf("x0=%f,x1=%f,x2=%f,x3=%f\n", x0, x1, x2, x3);
+    printf("sx0=%f,sx1=%f,sx2=%f,sx3=%f\n", sig_x0, sig_x1, sig_x2, sig_x3);
     double log_sig_x0, log_sig_x1, log_sig_x2, log_sig_x3;
     log_sig_x0 = log(sig_x0);
     log_sig_x1 = log(sig_x1);
     log_sig_x2 = log(sig_x2);
     log_sig_x3 = log(sig_x3);
     double w_wind = id0 == id2 ? 0.f : (row.wind - row0.wind) / (row2.wind - row0.wind);
+    printf("log_sig_x0=%f, log_sig_x1=%f,log_sig_x2=%f,log_sig_x3=%f\n", log_sig_x0, log_sig_x1, log_sig_x2, log_sig_x3);
+    printf("w_wind=%f\n", w_wind);
 
     double log_sig_x02, log_sig_x13;
     log_sig_x02 = (1.f - w_wind) * log_sig_x0 + w_wind * log_sig_x2;
     log_sig_x13 = (1.f - w_wind) * log_sig_x1 + w_wind * log_sig_x3;
-
+    printf("log_sig_x02=%f, log_sig_x13=%f\n", log_sig_x02, log_sig_x13);
 
     double logx0 = log(x0);
     double logx1 = log(x1);
@@ -797,12 +803,12 @@ void calcData_virtual_new(std::vector<CSVDataRow> coefs, const int id0, const in
 
     double log_sig = log(sig);
 
-    //double wx01 = id0 == id1 ? 0.f : (logx - logx0) / (logx1 - logx0);
-    //double wx23 = id2 == id3 ? 0.f : (logx - logx2) / (logx3 - logx2);
+    // double wx01 = id0 == id1 ? 0.f : (logx - logx0) / (logx1 - logx0);
+    // double wx23 = id2 == id3 ? 0.f : (logx - logx2) / (logx3 - logx2);
 
     double w_sig = id0 == id2 ? 0.f : (log_sig - log_sig_x02) / (log_sig_x13 - log_sig_x02);
 
-    double log_x_coef = (1.-w_sig) * logx0 + w_sig * logx2;
+    double log_x_coef = (1. - w_sig) * logx0 + w_sig * logx2;
 
     if (xid == 0)
         row.xv = exp(log_x_coef);
@@ -1156,6 +1162,7 @@ void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, s
             }
             else
             {
+                /*
                 tip = cdfFunction(row.wind * row.t - row.x, row.sig_x);
                 double ut = std::max(0., row.t) * row.wind - row.dur;
                 tail = cdfFunction(ut - row.x, row.sig_x);
@@ -1181,6 +1188,43 @@ void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, s
                 dosage = (tip - tail) * const_tmp;
                 dinf = qyz / row.wind;
                 dinf *= cdfFunction(-row.x, row.sig_x);
+                */
+                // Calculate the tip
+                double tip_time = row.t; // Adjust according to Python's tpeak function logic if necessary
+                double tip = cdfFunction(row.wind * tip_time - row.x, row.sig_x);
+
+                // Calculate the tail
+                double ut = std::max(0., row.t - row.dur) * row.wind; // corrected for the release duration
+                double tail = cdfFunction(ut - row.x, row.sig_x);
+
+                // Calculate concentration
+                concentration = (tip - tail) * qyz / row.wind / row.dur;
+
+                // Time of peak concentration (adjust according to the tpeak logic from Python)
+                double tp = tip_time; // This should come from a function similar to tpeak in Python
+
+                // Calculate peak concentration
+                double tipp = cdfFunction(row.wind * tp - row.x, row.sig_x);
+                double utp = std::max(0., tp - row.dur) * row.wind;
+                double tailp = cdfFunction(utp - row.x, row.sig_x);
+                cpeak = (tipp - tailp) * qyz / row.wind / row.dur;
+
+                double tip1 = IcdfFunction(row.wind * row.t - row.x, row.sig_x);
+                double tip0 = IcdfFunction(-row.x, row.sig_x);
+                tip = tip1 - tip0;
+
+                // For t<=T, tail is attached to the source
+                double tail0 = cdfFunction(-row.x, row.sig_x) * std::min(row.t, row.dur) * row.wind / row.sig_x;
+
+                // For t>=T, tail is moving
+                double arg = row.wind * std::max(0., row.t - row.dur);
+                double tail2 = IcdfFunction(arg - row.x, row.sig_x);
+                double tail1 = IcdfFunction(-row.x, row.sig_x);
+                tail = tail2 - tail1 + tail0;
+
+                double constant = qyz * row.sig_x / (row.dur * (row.wind * row.wind));
+                double dose = (tip - tail) * constant;
+                double dinf = qyz / row.wind * cdfFunction(-row.x, row.sig_x);
             }
         }
 
@@ -1257,6 +1301,7 @@ void generateComplete(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coef
         printf("\ni=%d\n", i);
         printf("row.istab: %d, row.wind: %f, row.x: %f, row.y: %f, row.z: %f, row.sig_x: %f, row.sig_y: %f, row.sig_z: %f\n", row.istab, row.wind, row.x, row.y, row.z, row.sig_x, row.sig_y, row.sig_z);
 #endif
+        /*
         if (x < xmin)
             x = xmin;
         if (x > xmax)
@@ -1269,6 +1314,7 @@ void generateComplete(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coef
             z = zmin;
         if (z > zmax)
             z = zmax;
+            */
         printf("clip sig_x = %f\n", x);
         printf("clip sig_y = %f\n", y);
         printf("clip sig_z = %f\n", z);
@@ -1278,7 +1324,7 @@ void generateComplete(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coef
         int id0, id1, id2, id3;
         bool flag = false;
 
-        if(x>EPSILON)
+        if (x > EPSILON)
         {
             findFourCoefs_sig(coefs, istab, wind, x, id0, id1, id2, id3, flag, 0);
 #if (PRTCHECK)
@@ -1290,7 +1336,7 @@ void generateComplete(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coef
             row.xv = 0;
         printf("xk_flag, compareSigmaData, row.xv = %f\n", row.xv);
 
-        if(y>EPSILON)
+        if (y > EPSILON)
         {
             findFourCoefs_sig(coefs, istab, wind, y, id0, id1, id2, id3, flag, 1);
             printf("xk_flag, compareSigmaData:sigmay search, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
@@ -1300,8 +1346,7 @@ void generateComplete(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coef
             row.yv = 0;
         printf("xk_flag, compareSigmaData, row.yv = %f\n", row.yv);
 
-
-        if(z>EPSILON)
+        if (z > EPSILON)
         {
             findFourCoefs_sig(coefs, istab, wind, z, id0, id1, id2, id3, flag, 2);
             printf("xk_flag, compareSigmaData:sigmaz search, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
@@ -1347,7 +1392,7 @@ void generateComplete(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coef
         double tip, tail;
         double dosage;
         double dinf;
-        x = row.x+row.xv;
+        x = row.x + row.xv;
         if (row.t >= 0)
         {
             xfunc = pdfFunction(row.wind * row.t - x, row.sig_x);
@@ -1364,10 +1409,10 @@ void generateComplete(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coef
             double xfuncinf = (1.f - cdfFunction(arg0, row.sig_x)) / row.wind;
             dinf = xfuncinf * qyz;
         }
-        //double concentration = centerlineConcentration(
-          //  (row.x + row.xv), row.t, row.mass, row.wind, zfunc, row.sig_x, row.sig_y);
-        //double dosage = centerlineDosage(
-          //  (row.x + row.xv), row.t, row.mass, row.wind, zfunc, row.sig_x, row.sig_y);
+        // double concentration = centerlineConcentration(
+        //   (row.x + row.xv), row.t, row.mass, row.wind, zfunc, row.sig_x, row.sig_y);
+        // double dosage = centerlineDosage(
+        //   (row.x + row.xv), row.t, row.mass, row.wind, zfunc, row.sig_x, row.sig_y);
 
         outputFile << i << "," << istab << "," << wind << ",";
         outputFile << row.x << "," << row.y << "," << row.z << ",";
