@@ -1100,7 +1100,7 @@ void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, s
             windmax = wind;
     }
 
-    outputFile << "ID,istab,wind,x,y,z,icurve,t,dur,sig_x,sig_y,sig_z, zfunc, yfunc, xfunc,qyz,cpeak, concentration, dinf, dose\n";
+    outputFile << "ID,istab,wind,x,y,z,icurve,t,dur,sig_x,sig_y,sig_z, zfunc, yfunc, xfunc,qyz,cpeak, concentration, dinf, dose,mytip,mytip1,mytip0, mytail, myconst\n";
 
     int pass_count = 0;
     // loop over all rows in data
@@ -1139,7 +1139,7 @@ void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, s
 
         double qyz = row.mass * yfunc * zfunc;
         double xfunc, concentration, cpeak, xfuncp;
-        double tip, tail;
+        double tip, tail,constant,tip1,tip0;
         double dosage;
         double dinf;
         if (row.t >= 0)
@@ -1191,17 +1191,21 @@ void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, s
                 */
                 // Calculate the tip
                 double tip_time = row.t; // Adjust according to Python's tpeak function logic if necessary
-                double tip = cdfFunction(row.wind * tip_time - row.x, row.sig_x);
+                tip = cdfFunction(row.wind * tip_time - row.x, row.sig_x);
 
                 // Calculate the tail
                 double ut = std::max(0., row.t - row.dur) * row.wind; // corrected for the release duration
-                double tail = cdfFunction(ut - row.x, row.sig_x);
+                tail = cdfFunction(ut - row.x, row.sig_x);
 
                 // Calculate concentration
                 concentration = (tip - tail) * qyz / row.wind / row.dur;
 
                 // Time of peak concentration (adjust according to the tpeak logic from Python)
-                double tp = tip_time; // This should come from a function similar to tpeak in Python
+                //double tp = tip_time; // This should come from a function similar to tpeak in Python
+                
+                 //tpeak( x, U, dur)= max(dur, 0.5 * dur + x / U)
+                //tp = np.array([self.tpeak(row['x'], row['U'], row['dur']) for row in df1.iloc])
+                double tp = std::max(row.dur, 0.5 * row.dur + row.x / row.wind);
 
                 // Calculate peak concentration
                 double tipp = cdfFunction(row.wind * tp - row.x, row.sig_x);
@@ -1209,8 +1213,8 @@ void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, s
                 double tailp = cdfFunction(utp - row.x, row.sig_x);
                 cpeak = (tipp - tailp) * qyz / row.wind / row.dur;
 
-                double tip1 = IcdfFunction(row.wind * row.t - row.x, row.sig_x);
-                double tip0 = IcdfFunction(-row.x, row.sig_x);
+                tip1 = IcdfFunction(row.wind * row.t - row.x, row.sig_x);
+                tip0 = IcdfFunction(-row.x, row.sig_x);
                 tip = tip1 - tip0;
 
                 // For t<=T, tail is attached to the source
@@ -1222,9 +1226,9 @@ void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, s
                 double tail1 = IcdfFunction(-row.x, row.sig_x);
                 tail = tail2 - tail1 + tail0;
 
-                double constant = qyz * row.sig_x / (row.dur * (row.wind * row.wind));
-                double dose = (tip - tail) * constant;
-                double dinf = qyz / row.wind * cdfFunction(-row.x, row.sig_x);
+                constant = qyz * row.sig_x / (row.dur * (row.wind * row.wind));
+                dosage = (tip - tail) * constant;
+                dinf = qyz / row.wind * cdfFunction(row.x, row.sig_x);
             }
         }
 
@@ -1232,7 +1236,8 @@ void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, s
         outputFile << row.x << "," << row.y << "," << row.z << ",";
         outputFile << row.icurve << "," << row.t << "," << row.dur << ",";
         outputFile << row.sig_x << "," << row.sig_y << "," << row.sig_z << ",";
-        outputFile << zfunc << "," << yfunc << "," << xfunc << "," << qyz << "," << cpeak << "," << concentration << "," << dinf << "," << dosage << "\n";
+        outputFile << zfunc << "," << yfunc << "," << xfunc << "," << qyz << ",";
+        outputFile << cpeak << "," << concentration << "," << dinf << "," << dosage << "," << tip << "," << tip1 << "," << tip0 << "," << tail << "," << constant << "\n";
 
     } // end of loop over all rows in data
     outputFile.close();
