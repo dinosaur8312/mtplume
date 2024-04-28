@@ -1100,7 +1100,7 @@ void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, s
             windmax = wind;
     }
 
-    outputFile << "ID,istab,wind,x,y,z,icurve,t,dur,sig_x,sig_y,sig_z, zfunc, yfunc, xfunc,qyz,cpeak, concentration, dinf, dose,mytip,mytip1,mytip0, mytail, myconst\n";
+    outputFile << "ID,istab,wind,x,y,z,icurve,t,dur,sig_x,sig_y,sig_z, zfunc, yfunc, xfunc,qyz,cpeak, concentration, dinf, dose\n";
 
     int pass_count = 0;
     // loop over all rows in data
@@ -1237,7 +1237,7 @@ void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, s
         outputFile << row.icurve << "," << row.t << "," << row.dur << ",";
         outputFile << row.sig_x << "," << row.sig_y << "," << row.sig_z << ",";
         outputFile << zfunc << "," << yfunc << "," << xfunc << "," << qyz << ",";
-        outputFile << cpeak << "," << concentration << "," << dinf << "," << dosage << "," << tip << "," << tip1 << "," << tip0 << "," << tail << "," << constant << "\n";
+        outputFile << cpeak << "," << concentration << "," << dinf << "," << dosage  << "\n";
 
     } // end of loop over all rows in data
     outputFile.close();

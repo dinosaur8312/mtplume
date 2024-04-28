@@ -1,0 +1,5 @@
+{
+    "coefs_CSV": "../tests/unit_tests/hpac_dispersion_coefs.csv",
+    "reference_CSV": "../tests/unit_tests/source_dose_v_dist_in.csv",
+    "outputCSV": "output_source_dose_v_dist.csv"
+}
