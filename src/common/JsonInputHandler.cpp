@@ -58,7 +58,7 @@ SimConfig JsonInputHandler::processJsonFile(const std::string& filePath) {
     {
         config.computeMode = 4;
     }
-    else if (config.refCSVPath.find("dose_v") != std::string::npos) 
+    else if (config.refCSVPath.find("dose_v_time") != std::string::npos) 
     {
         config.computeMode = 5;
     }
@@ -68,7 +68,7 @@ SimConfig JsonInputHandler::processJsonFile(const std::string& filePath) {
     }
     else
     {
-        config.computeMode = 3;
+        config.computeMode = 6;
     }
     //print the path
     std::cout << "input coef CSV: " << config.coefCSVPath << std::endl;

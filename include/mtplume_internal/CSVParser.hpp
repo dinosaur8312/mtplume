@@ -13,13 +13,13 @@ struct CSVDataRow
 {
     // int id;
     // int index;
-    double x; // Assuming "X" represents a numeric value
-    double y;
-    double z;
+    double x=0; // Assuming "X" represents a numeric value
+    double y =0;
+    double z = 0;
     // double D0;
-    double sig_x;
-    double sig_y;
-    double sig_z;
+    double sig_x =0;
+    double sig_y=0;
+    double sig_z=0;
     // double D0U_Q;
     // double coef_y;
     // double expon_y;
@@ -34,13 +34,23 @@ struct CSVDataRow
     double hml;
     double zplume;
     double zrcp;
-    double t;
-    double concentration;
-    double dosage;
-    double xv;
-    double yv;
-    double zv;
-    double dur;
+    double t =0;
+    double concentration =0;
+    double dosage =0 ;
+    double xv =0;
+    double yv =0;
+    double zv =0;
+    double dur =0;
+
+    double cpeak=0;
+    double dinf=0;
+    double xfunc=0;
+    double xfuncp=0;
+    double yfunc=0;
+    double zfunc =0 ;
+    double qyz =0 ;
+    double ctip =0;
+    double ctail =0;
     // char stab; // Stab as character type
     // std::string how; // How as string type
 };
@@ -73,6 +83,8 @@ public:
 
         //print computeMode
         std::cout << "computeMode: " << config.computeMode << std::endl;
+
+
 
         if (config.computeMode ==1)
         {
@@ -134,12 +146,12 @@ public:
         }
         else if(config.computeMode==6)
         {
-            io::CSVReader<13, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
-            in.read_header(io::ignore_extra_column, "istab","U","zi","Q_mg","x", "y","sig_x0","sig_y0","sig_z0", "z","zplume", "icurve","t");
+            io::CSVReader<14, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
+            in.read_header(io::ignore_extra_column, "istab","U","zi","Q_mg","x", "y","dur","sig_x0","sig_y0","sig_z0", "z","zplume", "icurve","t");
             CSVDataRow row;
             float istab;
             float icurve;
-            while (in.read_row(istab, row.wind, row.hml,row.mass,row.x, row.y,row.sig_x,row.sig_y, row.sig_z, row.zrcp, row.zplume, icurve, row.t))
+            while (in.read_row(istab, row.wind, row.hml,row.mass,row.x, row.y,row.dur, row.sig_x,row.sig_y, row.sig_z, row.zrcp, row.zplume, icurve, row.t))
             {
                 row.istab = (int)istab;
                 row.icurve = (int)icurve;
