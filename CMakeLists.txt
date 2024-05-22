@@ -10,7 +10,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Include directories
 include_directories(
     include/mtplume
-    include/mtplume_internal
+    include/json
+    include/csv_parser
 )
 
 # Add the nlohmann/json include directory

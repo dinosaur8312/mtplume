@@ -1,6 +1,6 @@
 #pragma once
 
-#include <nlohmann/json.hpp>
+#include <json.hpp>
 #include "SimConfig.hpp"
 #include <string>
 #include <fstream>
