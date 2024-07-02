@@ -26,13 +26,15 @@ struct CSVDataRow
     // double coef_z;
     // double expon_z;
     // int iwind; // Iwind as integer type
-    int istab; // Istab as integer type
-    double wind;
-    double mass;
-    int icurve;
+    int istab=1; // Istab as integer type
+    double wind=1.f;
+    double mass=1.f;
+    int icurve=0;
+    double decay = 0.f;
+    double vd = 0.f;
 
-    double hml;
-    double zplume;
+    double hml=0;
+    double zplume=0;
     double zrcp;
     double t =0;
     double concentration =0;
@@ -155,6 +157,30 @@ public:
             {
                 row.istab = (int)istab;
                 row.icurve = (int)icurve;
+                rows.push_back(row);
+            }
+        }
+        else if(config.computeMode == 7)
+        {
+            io::CSVReader<13, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
+            in.read_header(io::ignore_extra_column, "istab","U","zi","Q_mg","dur","x","y","z", "zplume", "icurve","t", "decay", "vd");
+            CSVDataRow row;
+            while (in.read_row(row.istab, row.wind, row.hml,row.mass,row.dur,row.x, row.y, row.zrcp, row.zplume, row.icurve, row.t, row.decay, row.vd))
+            {
+                row.sig_x = std::nan("");
+                row.sig_y = std::nan("");
+                rows.push_back(row);
+            }
+        }
+        else if(config.computeMode == 8)
+        {
+            io::CSVReader<8, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
+            in.read_header(io::ignore_extra_column, "istab","wind","hml","Q","x","y","t",  "dep_velocity");
+            CSVDataRow row;
+            while (in.read_row(row.istab, row.wind, row.hml,row.mass,row.x, row.y,  row.t, row.vd))
+            {
+                row.sig_x = std::nan("");
+                row.sig_y = std::nan("");
                 rows.push_back(row);
             }
         }

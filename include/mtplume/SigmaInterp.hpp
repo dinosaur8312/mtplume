@@ -3,10 +3,11 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <iomanip>
 #include <algorithm>
 #include "CSVParser.hpp"
 #include "SimConfig.hpp"
-#define PRTCHECK 1
+#define PRTCHECK 0
 void findFourCoefs(std::vector<CSVDataRow> coefs, const int istab, const float wind, const float x,
                    int &id0, int &id1, int &id2, int &id3, bool &flag);
 void findFourCoefs_sig(std::vector<CSVDataRow> coefs, const int istab, const float wind, const float sig_x,
@@ -146,7 +147,7 @@ public:
             generateSourceSigma(data, coefs, outputFile);
             return;
         }
-        if(computeMode ==5)
+        if((computeMode ==5)||(computeMode >=7))
         {
             generateDose(data, coefs, outputFile);
             return;
@@ -255,7 +256,7 @@ public:
             findFourCoefs_sig(coefs, istab, wind, sig_x, id0, id1, id2, id3, flag,0);
 
 #if (PRTCHECK)
-            printf("xk_flag, compareSigmaData, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
+           // printf("xk_flag, compareSigmaData, i=%d, id0 = %d, id1 = %d, id2 = %d, id3 = %d\n", i, id0, id1, id2, id3);
 #endif
             //compareSigmaData(coefs, id0, id1, id2, id3, x, row, sig_x_ref, sig_x_cal, err_x, 0);
             compareXData(coefs, id0, id1, id2, id3, sig_x, row, sig_x_ref, sig_x_cal, err_x, 0);

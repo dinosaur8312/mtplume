@@ -1,0 +1,5 @@
+{
+    "coefs_CSV": "../tests/unit_tests/hpac_dispersion_coefs.csv",
+    "reference_CSV": "../tests/unit_tests/decay_test.csv",
+    "outputCSV": "output_decay_test.csv"
+}

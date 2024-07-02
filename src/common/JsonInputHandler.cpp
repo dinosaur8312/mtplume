@@ -66,6 +66,14 @@ SimConfig JsonInputHandler::processJsonFile(const std::string& filePath) {
     {
         config.computeMode = 6;
     }
+    else if (config.refCSVPath.find("decay") != std::string::npos) 
+    {
+        config.computeMode = 7;
+    }
+    else if (config.refCSVPath.find("depostion") != std::string::npos) 
+    {
+        config.computeMode = 8;
+    }
     else
     {
         config.computeMode = 6;

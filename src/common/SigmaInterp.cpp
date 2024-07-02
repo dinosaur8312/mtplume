@@ -595,6 +595,52 @@ void calcData(std::vector<CSVDataRow> coefs, const int id0, const int id1, const
     row.sig_z = exp(log_sig_x_coef);
 }
 
+double calcSigz(std::vector<CSVDataRow> coefs, const int id0, const int id1, const int id2, const int id3, double x, double wind)
+{
+    auto row0 = coefs[id0];
+    auto row1 = coefs[id1];
+    auto row2 = coefs[id2];
+    auto row3 = coefs[id3];
+
+    double x0, x1, x2, x3;
+    x0 = row0.x;
+    x1 = row1.x;
+    x2 = row2.x;
+    x3 = row3.x;
+    double logx0 = log(x0);
+    double logx1 = log(x1);
+    double logx2 = log(x2);
+    double logx3 = log(x3);
+
+    double logx = log(x);
+
+    double wx01 = id0 == id1 ? 0.f : (logx - logx0) / (logx1 - logx0);
+    double wx23 = id2 == id3 ? 0.f : (logx - logx2) / (logx3 - logx2);
+
+    double w_wind = id0 == id2 ? 0.f : (wind - row0.wind) / (row2.wind - row0.wind);
+
+    double sig_x0, sig_x1, sig_x2, sig_x3;
+    double log_sig_x0, log_sig_x1, log_sig_x2, log_sig_x3;
+    double log_sig_x01, log_sig_x23;
+    double log_sig_x_coef;
+
+    sig_x0 = row0.sig_z;
+    sig_x1 = row1.sig_z;
+    sig_x2 = row2.sig_z;
+    sig_x3 = row3.sig_z;
+
+    log_sig_x0 = log(sig_x0);
+    log_sig_x1 = log(sig_x1);
+    log_sig_x2 = log(sig_x2);
+    log_sig_x3 = log(sig_x3);
+
+    log_sig_x01 = (1.f - wx01) * log_sig_x0 + wx01 * log_sig_x1;
+    log_sig_x23 = (1.f - wx23) * log_sig_x2 + wx23 * log_sig_x3;
+
+    log_sig_x_coef = (1.f - w_wind) * log_sig_x01 + w_wind * log_sig_x23;
+    return exp(log_sig_x_coef);
+}
+
 void calcSigma(std::vector<CSVDataRow> coefs, const int id0, const int id1, const int id2, const int id3, double x,
                CSVDataRow &row, const int comp)
 {
@@ -954,7 +1000,6 @@ void calDosage(CSVDataRow &row)
         row.x -= row.xv;
     }
     */
-
 }
 
 void generateSample(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, std::ofstream &outputFile)
@@ -1178,6 +1223,46 @@ void generateSourceSigma(std::vector<CSVDataRow> data, std::vector<CSVDataRow> c
     std::cout << "Total number of test cases = " << data.size() << "\n";
     std::cout << "Pass rate = " << pass_rate << "%\n";
 }
+
+double calcDepletion(const CSVDataRow &row, const std::vector<CSVDataRow> &coefs)
+{
+    double x_high = row.x;
+    double log_x_high = log(x_high);
+
+    double x_low = 10.f;
+    double log_x_low = log(x_low);
+    double x_range = x_high - x_low;
+    int integral_steps = 100;
+    double step = (log_x_high - log_x_low) / (integral_steps - 1);
+
+
+    double sumz = 0;
+    for (int i = 0; i < integral_steps; i++)
+    {
+        // uniform distributed log scale from x_low to x_high
+
+        double mylog_low = log_x_low + i * step;
+        double mylog_high = log_x_low + (i + 1) * step;
+
+
+        double mylog_x = log_x_low + i * step + 0.5 * step;
+        double x = exp(mylog_x);
+        double x_low = exp(mylog_low);
+        double x_high = exp(mylog_high);
+
+        int id0, id1, id2, id3;
+        bool flag = false;
+
+        findFourCoefs(coefs, row.istab, row.wind, x, id0, id1, id2, id3, flag);
+        double sigz = calcSigz(coefs, id0, id1, id2, id3, x, row.wind);
+        double zfunc = zFunction(row.zrcp, row.zplume, row.hml, sigz);
+
+        sumz += zfunc * (x_high-x_low);
+    }
+
+    return exp(-sumz * row.vd / row.wind);
+}
+
 void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, std::ofstream &outputFile)
 {
     // find min and max wind speed and x in coefs table
@@ -1201,7 +1286,19 @@ void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, s
             windmax = wind;
     }
 
-    outputFile << "ID,istab,wind,x,y,z,icurve,t,dur,sig_x,sig_y,sig_z, zfunc, yfunc, xfunc,qyz,cpeak, concentration, dinf, dose\n";
+    auto row_test = data[0];
+    if (row_test.decay > 0)
+    {
+        outputFile << "ID,istab,wind,hml,x,y,z,icurve,t,dur,sig_x,sig_y,sig_z, zfunc, yfunc, xfunc,qyz,cpeak, concentration, c_remain, c_surf, dinf, c_surf_inf,dose, d_remain\n";
+    }
+    else if (row_test.vd >= 0)
+    {
+        outputFile << "ID,istab,wind,hml,vd, x,y,z,icurve,t,sig_x,sig_y,sig_z, zfunc, yfunc, xfunc,qyz,cpeak, concentration, c_surf, c_surf_inf, C_dep, dose, D_dep, delta_dep\n";
+    }
+    else
+    {
+        outputFile << "ID,istab,wind,x,y,z,icurve,t,dur,sig_x,sig_y,sig_z, zfunc, yfunc, xfunc,qyz,cpeak, concentration, dinf, dose\n";
+    }
 
     int pass_count = 0;
     // loop over all rows in data
@@ -1216,8 +1313,8 @@ void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, s
 // printf(" istab = %d, wind = %f \n", istab, wind);
 // print all row data
 #if (PRTCHECK)
-        printf("\ni=%d, computeMode=5\n", i);
-        printf("row.istab: %d, row.wind: %f, row.x: %f, row.y: %f, row.z: %f, row.sig_x: %f, row.sig_y: %f, row.sig_z: %f\n", row.istab, row.wind, row.x, row.y, row.z, row.sig_x, row.sig_y, row.sig_z);
+        //printf("\ni=%d, computeMode=5\n", i);
+        //printf("row.istab: %d, row.wind: %f, row.x: %f, row.y: %f, row.z: %f, row.sig_x: %f, row.sig_y: %f, row.sig_z: %f\n", row.istab, row.wind, row.x, row.y, row.z, row.sig_x, row.sig_y, row.sig_z);
 #endif
         if (x < xmin)
             x = xmin;
@@ -1243,12 +1340,16 @@ void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, s
         double tip, tail, constant, tip1, tip0;
         double dosage;
         double dinf;
+
+        double delta_dep,C_dep, D_dep;
         if (row.t >= 0)
         {
             if (row.dur < 1)
             {
                 xfunc = pdfFunction(row.wind * row.t - row.x, row.sig_x);
                 concentration = xfunc * qyz;
+                // print using scientific notation
+                //printf("xk_flag, pdfa = %f, xfunc = %f, qyz = %f, concentration = %8.4e\n", row.wind * row.t - row.x, xfunc, qyz, concentration);
                 xfuncp = pdfFunction(std::min(row.x, 0.), row.sig_x);
                 cpeak = xfuncp * qyz;
                 tail = 0;
@@ -1260,6 +1361,13 @@ void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, s
                 dosage = xfunc * qyz;
                 double xfuncinf = (1.f - cdfFunction(arg0, row.sig_x)) / row.wind;
                 dinf = xfuncinf * qyz;
+
+                if (row.vd >= 0)
+                {
+                    delta_dep = calcDepletion(row, coefs);
+                    C_dep = concentration * delta_dep;
+                    D_dep = dosage * delta_dep;
+                }
             }
             else
             {
@@ -1299,14 +1407,50 @@ void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, s
                 dosage = (tip - tail) * constant;
                 dinf = qyz / row.wind * cdfFunction(row.x, row.sig_x);
             }
-        }
 
+            if (row.decay > 0)
+            {
+                double delta_remain = exp(-row.decay * row.x / row.wind);
+                double c_remain = concentration * delta_remain;
+                double c_surf = row.vd * dosage;
+                double c_surf_inf = row.vd * dinf;
+                double d_remain = dosage * delta_remain;
+
+                outputFile << i << "," << istab << "," << wind << "," << row.hml << ",";
+                outputFile << row.x << "," << row.y << "," << row.z << ",";
+                outputFile << row.icurve << "," << row.t << "," << row.dur << ",";
+                outputFile << row.sig_x << "," << row.sig_y << "," << row.sig_z << ",";
+                outputFile << zfunc << "," << yfunc << "," << xfunc << "," << qyz << ",";
+                outputFile << std::scientific << std::setprecision(8) << cpeak << "," << concentration << "," << c_remain << "," << c_surf << "," << dinf << "," << c_surf_inf << "," << dosage << "," << d_remain << "\n";
+            }
+            else if (row.vd>=0)
+            {
+                double c_surf = row.vd * dosage;
+                double c_surf_inf = row.vd * dinf;
+                outputFile << i << "," << istab << "," << wind << "," << row.hml << "," << row.vd << ",";
+                outputFile << row.x << "," << row.y << "," << row.z << ",";
+                outputFile << row.icurve << "," << row.t << "," << row.sig_x << "," << row.sig_y << "," << row.sig_z << ",";
+                outputFile << zfunc << "," << yfunc << "," << xfunc << "," << qyz << ",";
+                outputFile << std::scientific << std::setprecision(8) << cpeak << "," << concentration << "," << c_surf << "," << c_surf_inf << "," << C_dep << "," << dosage <<"," <<D_dep << ","<<delta_dep<<"\n";
+            }
+            else
+            {
+                outputFile << i << "," << istab << "," << wind << ",";
+                outputFile << row.x << "," << row.y << "," << row.z << ",";
+                outputFile << row.icurve << "," << row.t << "," << row.dur << ",";
+                outputFile << row.sig_x << "," << row.sig_y << "," << row.sig_z << ",";
+                outputFile << zfunc << "," << yfunc << "," << xfunc << "," << qyz << ",";
+                outputFile << std::scientific << std::setprecision(8) << cpeak << "," << concentration << "," << dinf << "," << dosage << "\n";
+            }
+        }
+        /*
         outputFile << i << "," << istab << "," << wind << ",";
         outputFile << row.x << "," << row.y << "," << row.z << ",";
         outputFile << row.icurve << "," << row.t << "," << row.dur << ",";
         outputFile << row.sig_x << "," << row.sig_y << "," << row.sig_z << ",";
         outputFile << zfunc << "," << yfunc << "," << xfunc << "," << qyz << ",";
         outputFile << cpeak << "," << concentration << "," << dinf << "," << dosage << "\n";
+        */
 
     } // end of loop over all rows in data
     outputFile.close();
@@ -1432,9 +1576,9 @@ void generateComplete(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coef
         printf("xk_flag, compareSigmaData, row.zv = %f\n", row.zv);
 #endif
 
-        double x_merge = std::max(0.,row.x)+row.xv;
-        double y_merge = std::max(0.,row.x)+row.yv;
-        double z_merge = std::max(0.,row.x)+row.zv;
+        double x_merge = std::max(0., row.x) + row.xv;
+        double y_merge = std::max(0., row.x) + row.yv;
+        double z_merge = std::max(0., row.x) + row.zv;
 
         printf("xk_flag, compareSigmaData, row.x+row.xv = %f\n", row.x + row.xv);
         findFourCoefs(coefs, istab, wind, x_merge, id0, id1, id2, id3, flag);
@@ -1460,7 +1604,6 @@ void generateComplete(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coef
         // calcData_virtual(coefs, id0, id1, id2, id3, z, row, 2);
 
         printf("zrcp=%f,zplume=%f,hml=%f\n", row.zrcp, row.zplume, row.hml);
-
 
         calDosage(row);
         outputFile << i << "," << istab << "," << wind << ",";
