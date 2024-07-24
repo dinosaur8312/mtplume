@@ -11,7 +11,7 @@
 
 struct CSVDataRow
 {
-    // int id;
+     int id;
     // int index;
     double x=0; // Assuming "X" represents a numeric value
     double y =0;
@@ -26,9 +26,9 @@ struct CSVDataRow
     // double coef_z;
     // double expon_z;
     // int iwind; // Iwind as integer type
-    int istab=1; // Istab as integer type
-    double wind=1.f;
-    double mass=1.f;
+    int istab=0; // Istab as integer type
+    double wind=0.f;
+    double mass=0.f;
     int icurve=0;
     double decay = 0.f;
     double vd = 0.f;
@@ -55,8 +55,18 @@ struct CSVDataRow
     double ctail =0;
     // char stab; // Stab as character type
     // std::string how; // How as string type
+    std::string xyzt_file;
+    std::string output_file;
 };
 
+struct xyztRow
+{
+     int iloc;
+    double x=0; // Assuming "X" represents a numeric value
+    double y =0;
+    double z = 0;
+    double t =0;
+};
 
 
 class CSVParser
@@ -74,6 +84,20 @@ public:
         }
         return rows;
     }
+
+    static std::vector<xyztRow> parsexyztCSV(const std::string &filePath)
+    {
+        std::vector<xyztRow> rows;
+        io::CSVReader<5, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
+        in.read_header(io::ignore_extra_column, "iloc", "x", "y", "z", "t");
+        xyztRow row;
+        while (in.read_row(row.iloc,row.x, row.y, row.z, row.t))
+        {
+            rows.push_back(row);
+        }
+        return rows;
+    }
+
     static std::vector<CSVDataRow> parseRefCSV(const SimConfig &config)
     {
         std::vector<CSVDataRow> rows;
@@ -181,6 +205,48 @@ public:
             {
                 row.sig_x = std::nan("");
                 row.sig_y = std::nan("");
+                rows.push_back(row);
+            }
+        }
+        else if(config.computeMode == 9)
+        {
+            io::CSVReader<7, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
+            in.read_header(io::ignore_extra_column, "case", "Q_kg", "U", "istab","zi", "fn_fp_xyzt", "fn_fp_output");
+            CSVDataRow row;
+            while (in.read_row(row.id, row.mass, row.wind, row.istab, row.hml, row.xyzt_file, row.output_file))
+            {
+                row.mass *= 1e6;
+                row.sig_x = std::nan("");
+                row.sig_y = std::nan("");
+                row.xyzt_file = "/home/xianlong/Code/mtplume/tests/unit_tests/location_files/" + row.xyzt_file ;
+                rows.push_back(row);
+            }
+        }
+        else if(config.computeMode == 10)
+        {
+            io::CSVReader<9, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
+            in.read_header(io::ignore_extra_column, "case", "Q_kg", "dur","v_dep","U", "istab","zi", "fn_fp_xyzt", "fn_fp_output");
+            CSVDataRow row;
+            while (in.read_row(row.id, row.mass, row.dur, row.vd,row.wind, row.istab, row.hml, row.xyzt_file, row.output_file))
+            {
+                row.mass *= 1e6;
+                row.sig_x = std::nan("");
+                row.sig_y = std::nan("");
+                row.xyzt_file = "/home/xianlong/Code/mtplume/tests/unit_tests/location_files/" + row.xyzt_file ;
+                rows.push_back(row);
+            }
+        }
+         else if(config.computeMode == 11)
+        {
+            io::CSVReader<8, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
+            in.read_header(io::ignore_extra_column, "case", "Q_kg", "dur","U", "istab","zi", "fn_fp_xyzt", "fn_fp_output");
+            CSVDataRow row;
+            while (in.read_row(row.id, row.mass, row.dur, row.wind, row.istab, row.hml, row.xyzt_file, row.output_file))
+            {
+                row.mass *= 1e6;
+                row.sig_x = std::nan("");
+                row.sig_y = std::nan("");
+                row.xyzt_file = "/home/xianlong/Code/mtplume/tests/unit_tests/location_files_hires/" + row.xyzt_file ;
                 rows.push_back(row);
             }
         }

@@ -23,6 +23,7 @@ void compareXData(std::vector<CSVDataRow> coefs, const int id0, const int id1, c
 void compareZfunction(std::vector<CSVDataRow> data, std::ofstream &outputFile);
 void generateSample(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, std::ofstream &outputFile);
 void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, std::ofstream &outputFile);
+void generateDoseBatch(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs);
 void generateSourceSigma(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, std::ofstream &outputFile);
 void generateComplete(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, std::ofstream &outputFile);
 
@@ -121,12 +122,19 @@ public:
 #endif
         int computeMode = config.computeMode;
 
+        auto data = CSVParser::parseRefCSV(config);
+        auto coefs = CSVParser::parseCoefCSV(config.coefCSVPath);
+        if(computeMode >=9)
+        {
+            generateDoseBatch(data, coefs);
+            return;
+        }
+
         std::ofstream outputFile(config.outputCSVPath);
         if (!outputFile)
         {
             throw std::runtime_error("Cannot open the file: " + config.outputCSVPath);
         }
-        auto data = CSVParser::parseRefCSV(config);
 
         if (computeMode == 2)
         {
@@ -135,7 +143,6 @@ public:
         }
 
         // Further processing with config data...
-        auto coefs = CSVParser::parseCoefCSV(config.coefCSVPath);
 
         if(computeMode ==3)
         {
@@ -147,7 +154,7 @@ public:
             generateSourceSigma(data, coefs, outputFile);
             return;
         }
-        if((computeMode ==5)||(computeMode >=7))
+        if((computeMode ==5)||(computeMode ==7)||(computeMode ==8))
         {
             generateDose(data, coefs, outputFile);
             return;

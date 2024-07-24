@@ -74,6 +74,18 @@ SimConfig JsonInputHandler::processJsonFile(const std::string& filePath) {
     {
         config.computeMode = 8;
     }
+    else if (config.refCSVPath.find("Evp_Case") != std::string::npos) 
+    {
+        config.computeMode = 9;
+    }
+    else if (config.refCSVPath.find("Dust_Case") != std::string::npos) 
+    {
+        config.computeMode = 10;
+    }
+    else if (config.refCSVPath.find("Sem_Case") != std::string::npos) 
+    {
+        config.computeMode = 11;
+    }
     else
     {
         config.computeMode = 6;
