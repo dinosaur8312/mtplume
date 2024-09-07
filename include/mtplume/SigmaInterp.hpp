@@ -24,6 +24,7 @@ void compareZfunction(std::vector<CSVDataRow> data, std::ofstream &outputFile);
 void generateSample(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, std::ofstream &outputFile);
 void generateDose(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, std::ofstream &outputFile);
 void generateDoseBatch(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs);
+void generateCompleteBatch(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs);
 void generateSourceSigma(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, std::ofstream &outputFile);
 void generateComplete(std::vector<CSVDataRow> data, std::vector<CSVDataRow> coefs, std::ofstream &outputFile);
 
@@ -124,7 +125,12 @@ public:
 
         auto data = CSVParser::parseRefCSV(config);
         auto coefs = CSVParser::parseCoefCSV(config.coefCSVPath);
-        if(computeMode >=9)
+        if(computeMode == 12)
+        {
+            generateCompleteBatch(data, coefs);
+            return;
+        }
+        else if(computeMode >=9)
         {
             generateDoseBatch(data, coefs);
             return;

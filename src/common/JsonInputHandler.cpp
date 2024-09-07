@@ -86,6 +86,10 @@ SimConfig JsonInputHandler::processJsonFile(const std::string& filePath) {
     {
         config.computeMode = 11;
     }
+    else if (config.refCSVPath.find("Evp_virtual") != std::string::npos) 
+    {
+        config.computeMode = 12;
+    }
     else
     {
         config.computeMode = 6;

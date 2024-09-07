@@ -20,6 +20,9 @@ struct CSVDataRow
     double sig_x =0;
     double sig_y=0;
     double sig_z=0;
+    double sig_x0 =0;
+    double sig_y0=0;
+    double sig_z0=0;
     // double D0U_Q;
     // double coef_y;
     // double expon_y;
@@ -210,10 +213,10 @@ public:
         }
         else if(config.computeMode == 9)
         {
-            io::CSVReader<7, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
-            in.read_header(io::ignore_extra_column, "case", "Q_kg", "U", "istab","zi", "fn_fp_xyzt", "fn_fp_output");
+            io::CSVReader<8, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
+            in.read_header(io::ignore_extra_column, "case", "Q_kg", "U", "istab","zi", "depletion_time","fn_fp_xyzt", "fn_fp_output");
             CSVDataRow row;
-            while (in.read_row(row.id, row.mass, row.wind, row.istab, row.hml, row.xyzt_file, row.output_file))
+            while (in.read_row(row.id, row.mass, row.wind, row.istab, row.hml,row.dur, row.xyzt_file, row.output_file))
             {
                 row.mass *= 1e6;
                 row.sig_x = std::nan("");
@@ -250,6 +253,19 @@ public:
                 rows.push_back(row);
             }
         }
+        else if(config.computeMode == 12)
+        {
+            io::CSVReader<11, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
+            in.read_header(io::ignore_extra_column, "case", "Q_kg", "U", "istab","zi","sig_x0","sig_y0","sig_z0", "depletion_time","fn_fp_xyzt", "fn_fp_output");
+            CSVDataRow row;
+            while (in.read_row(row.id, row.mass, row.wind, row.istab, row.hml,row.sig_x0,row.sig_y0, row.sig_z0,row.dur, row.xyzt_file, row.output_file))
+            {
+                row.mass *= 1e6;
+                row.xyzt_file = "/home/xianlong/Code/mtplume/tests/unit_tests/location_files/" + row.xyzt_file ;
+                rows.push_back(row);
+            }
+        }
+
         else if(config.computeMode ==0)
         {
             io::CSVReader<6, io::trim_chars<' '>, io::double_quote_escape<',', '\"'>> in(filePath);
